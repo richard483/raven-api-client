@@ -78,7 +78,6 @@ public class RequestMappingMetadataBuilder {
   }
 
   private void prepareMethods() {
-    java.lang.reflect.Method[] declaredMethods = ReflectionUtils.getAllDeclaredMethods(type);
     methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(type))
         .filter(method ->
             method.getAnnotation(RequestMapping.class) != null ||
