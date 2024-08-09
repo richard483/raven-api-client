@@ -12,5 +12,8 @@ public class AsdService {
   public Mono<String> asd() {
     return asd.asd();
   }
+  public Mono<String> asda() {
+    return asd.asda();
+  }
 
 }

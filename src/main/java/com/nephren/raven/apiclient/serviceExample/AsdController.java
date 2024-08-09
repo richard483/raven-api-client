@@ -15,4 +15,9 @@ public class AsdController {
     return asdService.asd();
   }
 
+  @GetMapping("/asda")
+  public Mono<String> asda() {
+    return asdService.asda();
+  }
+
 }
