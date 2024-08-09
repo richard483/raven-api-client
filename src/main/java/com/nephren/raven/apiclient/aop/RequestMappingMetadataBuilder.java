@@ -79,15 +79,9 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareMethods() {
     methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(type))
-        .filter(method ->
-            method.getAnnotation(RequestMapping.class) != null ||
-                method.getAnnotation(GetMapping.class) != null ||
-                method.getAnnotation(PutMapping.class) != null ||
-                method.getAnnotation(PostMapping.class) != null ||
-                method.getAnnotation(PatchMapping.class) != null ||
-                method.getAnnotation(DeleteMapping.class) != null
-        )
-        .collect(Collectors.toMap(java.lang.reflect.Method::getName, method -> method)); // TODO:
+        .filter(this::isMethodHasRequestMappingAnnotation)
+        .collect(Collectors.toMap(java.lang.reflect.Method::getName, method -> method));
+    // TODO:
     // check if this is correct, because it different from the reference code
   }
 
@@ -321,6 +315,15 @@ public class RequestMappingMetadataBuilder {
     });
   }
 
+  private boolean isMethodHasRequestMappingAnnotation(Method method) {
+    return method.getAnnotation(GetMapping.class) != null
+        || method.getAnnotation(PutMapping.class) != null
+        || method.getAnnotation(PostMapping.class) != null
+        || method.getAnnotation(PatchMapping.class) != null
+        || method.getAnnotation(DeleteMapping.class) != null
+        || method.getAnnotation(RequestMapping.class) != null;
+  }
+
   private RavenRequestMapping getRequestMappingAnnotation(Method method) {
     if (method.getAnnotation(GetMapping.class) != null) {
       GetMapping getMapping = method.getAnnotation(GetMapping.class);
@@ -387,7 +390,7 @@ public class RequestMappingMetadataBuilder {
           .produces(deleteMapping.produces())
           .annotationType(GetMapping.class)
           .build();
-    } else {
+    } else if (method.getAnnotation(RequestMapping.class) != null) {
       RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
       return RavenRequestMapping.builder()
           .name(requestMapping.name())
@@ -401,7 +404,7 @@ public class RequestMappingMetadataBuilder {
           .annotationType(RequestMapping.class)
           .build();
     }
-
+    return null;
   }
 
   private String getDefaultContentType() {
