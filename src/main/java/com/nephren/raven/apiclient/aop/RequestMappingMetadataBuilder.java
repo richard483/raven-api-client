@@ -15,7 +15,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -158,8 +157,8 @@ public class RequestMappingMetadataBuilder {
             RequestParam annotation = parameter.getAnnotation(RequestParam.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 queryParamPosition.put(name, i);
               }
             }
@@ -168,26 +167,6 @@ public class RequestMappingMetadataBuilder {
       }
     });
   }
-
-  //  private void prepareApiUrl() {
-  //    methods.forEach((methodName, method) -> {
-  //      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-  //      if (requestMapping != null) {
-  //        Parameter[] parameters = method.getParameters();
-  //        if (parameters.length > 0) {
-  //          for (int i = 0;
-  //               i < parameters.length;
-  //               i++) {
-  //            Parameter parameter = parameters[i];
-  //            ApiUrl annotation = parameter.getAnnotation(ApiUrl.class);
-  //            if (annotation != null) {
-  //              apiUrlPositions.put(methodName, i);
-  //            }
-  //          }
-  //        }
-  //      }
-  //    });
-  //  }
 
   private void prepareHeaderParams() {
     methods.forEach((methodName, method) -> {
@@ -205,8 +184,8 @@ public class RequestMappingMetadataBuilder {
             RequestHeader annotation = parameter.getAnnotation(RequestHeader.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 headerParamPosition.put(name, i);
               }
             }
@@ -232,8 +211,8 @@ public class RequestMappingMetadataBuilder {
             PathVariable annotation = parameter.getAnnotation(PathVariable.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 pathVariablePosition.put(name, i);
               }
             }
@@ -289,8 +268,8 @@ public class RequestMappingMetadataBuilder {
             CookieValue annotation = parameter.getAnnotation(CookieValue.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 cookieParamPosition.put(name, i);
               }
             }
@@ -429,7 +408,6 @@ public class RequestMappingMetadataBuilder {
     preparePaths();
     prepareCookieParams();
     prepareContentTypes();
-    //    prepareApiUrl();
 
     return RequestMappingMetadata.builder()
         .properties(properties)
