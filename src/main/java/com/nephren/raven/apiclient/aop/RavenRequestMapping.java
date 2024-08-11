@@ -1,31 +1,22 @@
 package com.nephren.raven.apiclient.aop;
 
 import java.lang.annotation.Annotation;
-import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@Builder
+@NoArgsConstructor
 public class RavenRequestMapping implements RequestMapping {
 
-  @Builder.Default
-  private String name = "";
-  @Builder.Default
-  private String[] value = new String[0];
-  @Builder.Default
-  private String[] path = new String[0];
-  @Builder.Default
-  private RequestMethod[] method = new RequestMethod[0];
-  @Builder.Default
-  private String[] params = new String[0];
-  @Builder.Default
-  private String[] headers = new String[0];
-  @Builder.Default
-  private String[] consumes = new String[0];
-  @Builder.Default
-  private String[] produces = new String[0];
-  @Builder.Default
-  private Class<? extends Annotation> annotationType = null;
+  private final String name = "";
+  private final String[] value = new String[0];
+  private final String[] path = new String[0];
+  private final RequestMethod[] method = new RequestMethod[0];
+  private final String[] params = new String[0];
+  private final String[] headers = new String[0];
+  private final String[] consumes = new String[0];
+  private final String[] produces = new String[0];
+  private final Class<? extends Annotation> annotationType = RequestMapping.class;
 
   @Override
   public String name() {

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -304,86 +305,22 @@ public class RequestMappingMetadataBuilder {
   }
 
   private RavenRequestMapping getRequestMappingAnnotation(Method method) {
+    Class annotationType = RavenRequestMapping.class;
+    ModelMapper mapper = new ModelMapper();
     if (method.getAnnotation(GetMapping.class) != null) {
-      GetMapping getMapping = method.getAnnotation(GetMapping.class);
-      return RavenRequestMapping.builder()
-          .name(getMapping.name())
-          .value(getMapping.value())
-          .path(getMapping.path())
-          .method(new RequestMethod[] {RequestMethod.GET})
-          .params(getMapping.params())
-          .headers(getMapping.headers())
-          .consumes(getMapping.consumes())
-          .produces(getMapping.produces())
-          .annotationType(GetMapping.class)
-          .build();
+      annotationType = GetMapping.class;
     } else if (method.getAnnotation(PutMapping.class) != null) {
-      PutMapping putMapping = method.getAnnotation(PutMapping.class);
-      return RavenRequestMapping.builder()
-          .name(putMapping.name())
-          .value(putMapping.value())
-          .path(putMapping.path())
-          .method(new RequestMethod[] {RequestMethod.GET})
-          .params(putMapping.params())
-          .headers(putMapping.headers())
-          .consumes(putMapping.consumes())
-          .produces(putMapping.produces())
-          .annotationType(GetMapping.class)
-          .build();
+      annotationType = PutMapping.class;
     } else if (method.getAnnotation(PostMapping.class) != null) {
-      PostMapping postMapping = method.getAnnotation(PostMapping.class);
-      return RavenRequestMapping.builder()
-          .name(postMapping.name())
-          .value(postMapping.value())
-          .path(postMapping.path())
-          .method(new RequestMethod[] {RequestMethod.GET})
-          .params(postMapping.params())
-          .headers(postMapping.headers())
-          .consumes(postMapping.consumes())
-          .produces(postMapping.produces())
-          .annotationType(GetMapping.class)
-          .build();
+      annotationType = PostMapping.class;
     } else if (method.getAnnotation(PatchMapping.class) != null) {
-      PatchMapping patchMapping = method.getAnnotation(PatchMapping.class);
-      return RavenRequestMapping.builder()
-          .name(patchMapping.name())
-          .value(patchMapping.value())
-          .path(patchMapping.path())
-          .method(new RequestMethod[] {RequestMethod.GET})
-          .params(patchMapping.params())
-          .headers(patchMapping.headers())
-          .consumes(patchMapping.consumes())
-          .produces(patchMapping.produces())
-          .annotationType(GetMapping.class)
-          .build();
+      annotationType = PatchMapping.class;
     } else if (method.getAnnotation(DeleteMapping.class) != null) {
-      DeleteMapping deleteMapping = method.getAnnotation(DeleteMapping.class);
-      return RavenRequestMapping.builder()
-          .name(deleteMapping.name())
-          .value(deleteMapping.value())
-          .path(deleteMapping.path())
-          .method(new RequestMethod[] {RequestMethod.GET})
-          .params(deleteMapping.params())
-          .headers(deleteMapping.headers())
-          .consumes(deleteMapping.consumes())
-          .produces(deleteMapping.produces())
-          .annotationType(GetMapping.class)
-          .build();
+      annotationType = DeleteMapping.class;
     } else if (method.getAnnotation(RequestMapping.class) != null) {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-      return RavenRequestMapping.builder()
-          .name(requestMapping.name())
-          .value(requestMapping.value())
-          .path(requestMapping.path())
-          .method(requestMapping.method())
-          .params(requestMapping.params())
-          .headers(requestMapping.headers())
-          .consumes(requestMapping.consumes())
-          .produces(requestMapping.produces())
-          .annotationType(RequestMapping.class)
-          .build();
+      annotationType = RequestMapping.class;
     }
-    return null;
+    return mapper.map(method.getAnnotation(annotationType), RavenRequestMapping.class);
   }
 
   private String getDefaultContentType() {
