@@ -2,6 +2,7 @@ package com.nephren.raven.apiclient.aop;
 
 import com.nephren.raven.apiclient.properties.PropertiesHelper;
 import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
@@ -10,7 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -305,22 +305,58 @@ public class RequestMappingMetadataBuilder {
   }
 
   private RavenRequestMapping getRequestMappingAnnotation(Method method) {
-    Class annotationType = RavenRequestMapping.class;
-    ModelMapper mapper = new ModelMapper();
-    if (method.getAnnotation(GetMapping.class) != null) {
-      annotationType = GetMapping.class;
-    } else if (method.getAnnotation(PutMapping.class) != null) {
-      annotationType = PutMapping.class;
-    } else if (method.getAnnotation(PostMapping.class) != null) {
-      annotationType = PostMapping.class;
-    } else if (method.getAnnotation(PatchMapping.class) != null) {
-      annotationType = PatchMapping.class;
-    } else if (method.getAnnotation(DeleteMapping.class) != null) {
-      annotationType = DeleteMapping.class;
-    } else if (method.getAnnotation(RequestMapping.class) != null) {
-      annotationType = RequestMapping.class;
+    try {
+      if (method.getAnnotation(GetMapping.class) != null) {
+        return getAnnotation(method, GetMapping.class);
+      } else if (method.getAnnotation(PutMapping.class) != null) {
+        return getAnnotation(method, PutMapping.class);
+      } else if (method.getAnnotation(PostMapping.class) != null) {
+        return getAnnotation(method, PostMapping.class);
+      } else if (method.getAnnotation(PatchMapping.class) != null) {
+        return getAnnotation(method, PatchMapping.class);
+      } else if (method.getAnnotation(DeleteMapping.class) != null) {
+        return getAnnotation(method, DeleteMapping.class);
+      } else if (method.getAnnotation(RequestMapping.class) != null) {
+        return getAnnotation(method, RequestMapping.class);
+      }
+    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+      e.printStackTrace();
     }
-    return mapper.map(method.getAnnotation(annotationType), RavenRequestMapping.class);
+
+    return null;
+  }
+
+  private <T extends java.lang.annotation.Annotation> RavenRequestMapping getAnnotation(
+      Method method, Class<T> annotationType)
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    T annotation = method.getAnnotation(annotationType);
+    String[] consumes =
+        (String[]) annotation.getClass().getMethod("consumes").invoke(annotation);
+    String[] produces =
+        (String[]) annotation.getClass().getMethod("produces").invoke(annotation);
+    String[] headers = (String[]) annotation.getClass().getMethod("headers").invoke(annotation);
+    String[] path = (String[]) annotation.getClass().getMethod("path").invoke(annotation);
+    String[] value = (String[]) annotation.getClass().getMethod("value").invoke(annotation);
+    RequestMethod[] methodValue = new RequestMethod[] {getRequestMethod(annotationType)};
+    return RavenRequestMapping.builder()
+        .consumes(consumes)
+        .produces(produces)
+        .headers(headers)
+        .path(path)
+        .value(value)
+        .method(methodValue)
+        .build();
+  }
+
+  private RequestMethod getRequestMethod(Class clazz) {
+    return switch (clazz.getSimpleName()) {
+      case "GetMapping" -> RequestMethod.GET;
+      case "PutMapping" -> RequestMethod.PUT;
+      case "PostMapping" -> RequestMethod.POST;
+      case "PatchMapping" -> RequestMethod.PATCH;
+      case "DeleteMapping" -> RequestMethod.DELETE;
+      default -> RequestMethod.GET;
+    };
   }
 
   private String getDefaultContentType() {

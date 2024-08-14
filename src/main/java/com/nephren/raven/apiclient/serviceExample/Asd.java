@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import reactor.core.publisher.Mono;
 
-@RavenApiClient(name = "asd", url = "http://localhost:3000")
+@RavenApiClient(name = "asd")
 public interface Asd {
   @GetMapping(value = "/",
       produces = MediaType.TEXT_PLAIN_VALUE)
