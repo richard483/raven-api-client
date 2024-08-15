@@ -1,4 +1,4 @@
-package com.nephren.raven.apiclient.reactor.properties;
+package com.nephren.raven.apiclient.properties;
 
 import java.time.Duration;
 import java.util.HashMap;

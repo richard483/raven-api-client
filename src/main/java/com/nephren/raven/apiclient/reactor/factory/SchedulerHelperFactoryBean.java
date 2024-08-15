@@ -1,7 +1,7 @@
 package com.nephren.raven.apiclient.reactor.factory;
 
+import com.nephren.raven.apiclient.properties.SchedulerProperties;
 import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
-import com.nephren.raven.apiclient.reactor.properties.SchedulerProperties;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;

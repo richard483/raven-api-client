@@ -8,8 +8,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RavenApiClient {
-  //  String url();
-
   String name();
 
   Class<?> fallback() default Void.class;
