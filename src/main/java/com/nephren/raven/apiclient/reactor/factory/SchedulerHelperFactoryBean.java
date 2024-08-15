@@ -21,7 +21,7 @@ public class SchedulerHelperFactoryBean implements FactoryBean<SchedulerHelper> 
 
   private SchedulerProperties schedulerProperties;
   @Override
-  public SchedulerHelper getObject() throws Exception {
+  public SchedulerHelper getObject() {
     Map<String, Scheduler> schedulers = new HashMap<>();
 
     schedulerProperties.getConfigs().forEach((name, properties) -> {

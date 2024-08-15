@@ -346,7 +346,6 @@ public class RequestMappingMetadataBuilder {
 
   private RequestMethod getRequestMethod(Class clazz) {
     return switch (clazz.getSimpleName()) {
-      case "GetMapping" -> RequestMethod.GET;
       case "PutMapping" -> RequestMethod.PUT;
       case "PostMapping" -> RequestMethod.POST;
       case "PatchMapping" -> RequestMethod.PATCH;
