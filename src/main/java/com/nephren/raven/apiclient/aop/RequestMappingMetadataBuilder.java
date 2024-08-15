@@ -57,11 +57,11 @@ public class RequestMappingMetadataBuilder {
   }
 
   private void prepareProperties() {
-    RavenApiClientProperties apiClientproperties =
+    RavenApiClientProperties apiClientProperties =
         applicationContext.getBean(RavenApiClientProperties.class);
     properties = mergeApiClientConfigProperties(
-        apiClientproperties.getConfigs().get(RavenApiClientProperties.DEFAULT),
-        apiClientproperties.getConfigs().get(name)
+        apiClientProperties.getConfigs().get(RavenApiClientProperties.DEFAULT),
+        apiClientProperties.getConfigs().get(name)
     );
   }
 
@@ -144,8 +144,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareQueryParams() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> queryParamPosition = new HashMap<>();
         queryParamPositions.put(methodName, queryParamPosition);
@@ -171,8 +170,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareHeaderParams() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> headerParamPosition = new HashMap<>();
         headerParamPositions.put(methodName, headerParamPosition);
@@ -198,8 +196,7 @@ public class RequestMappingMetadataBuilder {
 
   private void preparePathVariables() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> pathVariablePosition = new HashMap<>();
         pathVariablePositions.put(methodName, pathVariablePosition);
@@ -255,8 +252,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareCookieParams() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> cookieParamPosition = new HashMap<>();
         cookieParamPositions.put(methodName, cookieParamPosition);
