@@ -1,7 +1,7 @@
 package com.nephren.raven.apiclient.reactor;
 
+import com.nephren.raven.apiclient.properties.SchedulerProperties;
 import com.nephren.raven.apiclient.reactor.factory.SchedulerHelperFactoryBean;
-import com.nephren.raven.apiclient.reactor.properties.SchedulerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

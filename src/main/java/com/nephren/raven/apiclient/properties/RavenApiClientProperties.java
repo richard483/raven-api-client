@@ -39,6 +39,8 @@ public class RavenApiClientProperties {
 
     private String url;
 
+    private Class<?> fallback;
+
     @DurationUnit(ChronoUnit.MILLIS)
     private Duration readTimeout = Duration.ofMillis(2000L);
 

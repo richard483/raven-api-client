@@ -2,6 +2,7 @@ package com.nephren.raven.apiclient.aop;
 
 import com.nephren.raven.apiclient.properties.PropertiesHelper;
 import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
@@ -15,7 +16,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,11 +57,11 @@ public class RequestMappingMetadataBuilder {
   }
 
   private void prepareProperties() {
-    RavenApiClientProperties apiClientproperties =
+    RavenApiClientProperties apiClientProperties =
         applicationContext.getBean(RavenApiClientProperties.class);
     properties = mergeApiClientConfigProperties(
-        apiClientproperties.getConfigs().get(RavenApiClientProperties.DEFAULT),
-        apiClientproperties.getConfigs().get(name)
+        apiClientProperties.getConfigs().get(RavenApiClientProperties.DEFAULT),
+        apiClientProperties.getConfigs().get(name)
     );
   }
 
@@ -78,24 +78,16 @@ public class RequestMappingMetadataBuilder {
   }
 
   private void prepareMethods() {
-    java.lang.reflect.Method[] declaredMethods = ReflectionUtils.getAllDeclaredMethods(type);
     methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(type))
-        .filter(method ->
-                method.getAnnotation(RequestMapping.class) != null
-            //                ||
-            //                method.getAnnotation(GetMapping.class) != null ||
-            //                method.getAnnotation(PutMapping.class) != null ||
-            //                method.getAnnotation(PostMapping.class) != null ||
-            //                method.getAnnotation(PatchMapping.class) != null ||
-            //                method.getAnnotation(DeleteMapping.class) != null
-        )
-        .collect(Collectors.toMap(java.lang.reflect.Method::getName, method -> method)); // TODO:
+        .filter(this::isMethodHasRequestMappingAnnotation)
+        .collect(Collectors.toMap(java.lang.reflect.Method::getName, method -> method));
+    // TODO:
     // check if this is correct, because it different from the reference code
   }
 
   private void preparePaths() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+      RequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
         String[] pathValues =
             requestMapping.path().length > 0 ? requestMapping.path() : requestMapping.value();
@@ -110,26 +102,11 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareRequestMethods() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-      GetMapping getMapping = method.getAnnotation(GetMapping.class);
-      PutMapping putMapping = method.getAnnotation(PutMapping.class);
-      PostMapping postMapping = method.getAnnotation(PostMapping.class);
-      PatchMapping patchMapping = method.getAnnotation(PatchMapping.class);
-      DeleteMapping deleteMapping = method.getAnnotation(DeleteMapping.class);
+      RequestMapping requestMapping = getRequestMappingAnnotation(method);
 
       if (requestMapping != null && requestMapping.method().length > 0) {
         RequestMethod[] methods = requestMapping.method();
         requestMethods.put(methodName, methods[0]);
-      } else if (getMapping != null) {
-        requestMethods.put(methodName, RequestMethod.GET);
-      } else if (putMapping != null) {
-        requestMethods.put(methodName, RequestMethod.PUT);
-      } else if (postMapping != null) {
-        requestMethods.put(methodName, RequestMethod.POST);
-      } else if (patchMapping != null) {
-        requestMethods.put(methodName, RequestMethod.PATCH);
-      } else if (deleteMapping != null) {
-        requestMethods.put(methodName, RequestMethod.DELETE);
       } else {
         requestMethods.put(methodName, RequestMethod.GET);
       }
@@ -167,8 +144,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareQueryParams() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> queryParamPosition = new HashMap<>();
         queryParamPositions.put(methodName, queryParamPosition);
@@ -181,8 +157,8 @@ public class RequestMappingMetadataBuilder {
             RequestParam annotation = parameter.getAnnotation(RequestParam.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 queryParamPosition.put(name, i);
               }
             }
@@ -192,30 +168,9 @@ public class RequestMappingMetadataBuilder {
     });
   }
 
-  //  private void prepareApiUrl() {
-  //    methods.forEach((methodName, method) -> {
-  //      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-  //      if (requestMapping != null) {
-  //        Parameter[] parameters = method.getParameters();
-  //        if (parameters.length > 0) {
-  //          for (int i = 0;
-  //               i < parameters.length;
-  //               i++) {
-  //            Parameter parameter = parameters[i];
-  //            ApiUrl annotation = parameter.getAnnotation(ApiUrl.class);
-  //            if (annotation != null) {
-  //              apiUrlPositions.put(methodName, i);
-  //            }
-  //          }
-  //        }
-  //      }
-  //    });
-  //  }
-
   private void prepareHeaderParams() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> headerParamPosition = new HashMap<>();
         headerParamPositions.put(methodName, headerParamPosition);
@@ -228,8 +183,8 @@ public class RequestMappingMetadataBuilder {
             RequestHeader annotation = parameter.getAnnotation(RequestHeader.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 headerParamPosition.put(name, i);
               }
             }
@@ -241,8 +196,7 @@ public class RequestMappingMetadataBuilder {
 
   private void preparePathVariables() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> pathVariablePosition = new HashMap<>();
         pathVariablePositions.put(methodName, pathVariablePosition);
@@ -255,8 +209,8 @@ public class RequestMappingMetadataBuilder {
             PathVariable annotation = parameter.getAnnotation(PathVariable.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 pathVariablePosition.put(name, i);
               }
             }
@@ -268,7 +222,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareHeaders() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+      RequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
         HttpHeaders httpHeaders = new HttpHeaders();
 
@@ -298,8 +252,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareCookieParams() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-      if (requestMapping != null) {
+      if (isMethodHasRequestMappingAnnotation(method)) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> cookieParamPosition = new HashMap<>();
         cookieParamPositions.put(methodName, cookieParamPosition);
@@ -312,8 +265,8 @@ public class RequestMappingMetadataBuilder {
             CookieValue annotation = parameter.getAnnotation(CookieValue.class);
             if (annotation != null) {
               String name =
-                  StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-              if (!StringUtils.isEmpty(name)) {
+                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
+              if (!name.isEmpty()) {
                 cookieParamPosition.put(name, i);
               }
             }
@@ -326,7 +279,7 @@ public class RequestMappingMetadataBuilder {
   private void prepareContentTypes() {
     String defaultContentType = getDefaultContentType();
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+      RequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
         String[] consumes = requestMapping.consumes();
         if (consumes.length > 0) {
@@ -336,6 +289,69 @@ public class RequestMappingMetadataBuilder {
         }
       }
     });
+  }
+
+  private boolean isMethodHasRequestMappingAnnotation(Method method) {
+    return method.getAnnotation(GetMapping.class) != null
+        || method.getAnnotation(PutMapping.class) != null
+        || method.getAnnotation(PostMapping.class) != null
+        || method.getAnnotation(PatchMapping.class) != null
+        || method.getAnnotation(DeleteMapping.class) != null
+        || method.getAnnotation(RequestMapping.class) != null;
+  }
+
+  private RavenRequestMapping getRequestMappingAnnotation(Method method) {
+    try {
+      if (method.getAnnotation(GetMapping.class) != null) {
+        return getAnnotation(method, GetMapping.class);
+      } else if (method.getAnnotation(PutMapping.class) != null) {
+        return getAnnotation(method, PutMapping.class);
+      } else if (method.getAnnotation(PostMapping.class) != null) {
+        return getAnnotation(method, PostMapping.class);
+      } else if (method.getAnnotation(PatchMapping.class) != null) {
+        return getAnnotation(method, PatchMapping.class);
+      } else if (method.getAnnotation(DeleteMapping.class) != null) {
+        return getAnnotation(method, DeleteMapping.class);
+      } else if (method.getAnnotation(RequestMapping.class) != null) {
+        return getAnnotation(method, RequestMapping.class);
+      }
+    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  private <T extends java.lang.annotation.Annotation> RavenRequestMapping getAnnotation(
+      Method method, Class<T> annotationType)
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    T annotation = method.getAnnotation(annotationType);
+    String[] consumes =
+        (String[]) annotation.getClass().getMethod("consumes").invoke(annotation);
+    String[] produces =
+        (String[]) annotation.getClass().getMethod("produces").invoke(annotation);
+    String[] headers = (String[]) annotation.getClass().getMethod("headers").invoke(annotation);
+    String[] path = (String[]) annotation.getClass().getMethod("path").invoke(annotation);
+    String[] value = (String[]) annotation.getClass().getMethod("value").invoke(annotation);
+    RequestMethod[] methodValue = new RequestMethod[] {getRequestMethod(annotationType)};
+    return RavenRequestMapping.builder()
+        .consumes(consumes)
+        .produces(produces)
+        .headers(headers)
+        .path(path)
+        .value(value)
+        .method(methodValue)
+        .build();
+  }
+
+  private RequestMethod getRequestMethod(Class clazz) {
+    return switch (clazz.getSimpleName()) {
+      case "PutMapping" -> RequestMethod.PUT;
+      case "PostMapping" -> RequestMethod.POST;
+      case "PatchMapping" -> RequestMethod.PATCH;
+      case "DeleteMapping" -> RequestMethod.DELETE;
+      default -> RequestMethod.GET;
+    };
   }
 
   private String getDefaultContentType() {
@@ -360,7 +376,6 @@ public class RequestMappingMetadataBuilder {
     preparePaths();
     prepareCookieParams();
     prepareContentTypes();
-    //    prepareApiUrl();
 
     return RequestMappingMetadata.builder()
         .properties(properties)

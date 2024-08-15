@@ -33,16 +33,15 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 @Slf4j
+@Setter
 @Configuration
 @AutoConfigureAfter({ReactorConfiguration.class})
 public class RavenApiClientRegistrar
     implements ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
 
-  public static final String METHOD_INTERCEPTOR = "MethodInterceptor";
+  private static final String METHOD_INTERCEPTOR = "MethodInterceptor";
 
-  @Setter
   private ResourceLoader resourceLoader;
-  @Setter
   private Environment environment;
 
   @Override

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nephren.raven.apiclient.annotation.RavenApiClient;
 import com.nephren.raven.apiclient.aop.RequestMappingMetadata;
 import com.nephren.raven.apiclient.aop.RequestMappingMetadataBuilder;
+import com.nephren.raven.apiclient.aop.fallback.FallbackMetadata;
+import com.nephren.raven.apiclient.aop.fallback.FallbackMetadataBuilder;
+import com.nephren.raven.apiclient.aop.fallback.RavenApiClientFallback;
 import com.nephren.raven.apiclient.body.ApiBodyResolver;
 import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
 import io.netty.channel.ChannelOption;
@@ -18,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import lombok.Setter;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -50,6 +54,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   private RequestMappingMetadata metadata;
   private List<ApiBodyResolver> bodyResolvers;
   private WebClient webClient;
+  private RavenApiClientFallback ravenApiClientFallback;
   @Setter
   private AnnotationMetadata annotationMetadata;
 
@@ -69,6 +74,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     prepareAttribute();
     prepareBodyResolvers();
     prepareWebClient();
+    prepareFallback();
     prepareScheduler();
 
   }
@@ -92,6 +98,26 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
             httpHeaders -> metadata.getProperties().getHeaders().forEach(httpHeaders::add));
     webClient = builder.build();
 
+  }
+
+  private void prepareFallback() {
+    RavenApiClient ravenApiClient = type.getAnnotation(RavenApiClient.class);
+    Object fallback = null;
+
+    if (ravenApiClient.fallback() != Void.class) {
+      fallback = applicationContext.getBean(ravenApiClient.fallback());
+    }
+
+    if (Objects.nonNull(metadata.getProperties().getFallback())) {
+      fallback = applicationContext.getBean(metadata.getProperties().getFallback());
+    }
+
+    FallbackMetadata fallbackMetadata = null;
+    if (fallback != null) {
+      fallbackMetadata = new FallbackMetadataBuilder(type, fallback.getClass()).build();
+    }
+    ravenApiClientFallback = RavenApiClientFallback.builder().fallback(fallback)
+        .fallbackMetadata(fallbackMetadata).build();
   }
 
   private void prepareBodyResolvers() {
@@ -257,6 +283,9 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private Mono doFallback(Throwable throwable, Method method, Object[] arguments) {
+    if (ravenApiClientFallback.isAvailable()) {
+      return ravenApiClientFallback.invoke(method, arguments, throwable);
+    }
     return Mono.error(throwable);
   }
 
