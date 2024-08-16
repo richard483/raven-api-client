@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-//@Profile("test")
 @RestController
 public class ClientController {
   @Autowired
@@ -15,6 +14,16 @@ public class ClientController {
   @GetMapping("/client/getRequest")
   public Mono<ResponseEntity<String>> getRequest() {
     return clientService.getRequest();
+  }
+
+  @GetMapping("/client/getRequest-ISE")
+  public Mono<ResponseEntity<String>> getRequestISE() {
+    return clientService.getRequestISE();
+  }
+
+  @GetMapping("/client/getRequest-ISE-fallback")
+  public Mono<ResponseEntity<String>> getRequestISEWithFallback() {
+    return clientService.getRequestWithFallback();
   }
 
 }

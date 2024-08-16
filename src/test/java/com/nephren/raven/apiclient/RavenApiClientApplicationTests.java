@@ -17,8 +17,28 @@ class RavenApiClientApplicationTests {
   }
   @Test
   void getRequest() {
-    webTestClient.get().uri("http://localhost:8080/client/getRequest").exchange().expectStatus()
-        .isOk();
+    webTestClient.get().uri("http://localhost:8080/client/getRequest")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Hello, World!");
+  }
+  @Test
+  void getRequestISE() {
+    webTestClient.get().uri("http://localhost:8080/client/getRequest-ISE")
+        .exchange()
+        .expectStatus()
+        .is5xxServerError()
+        .expectBody(String.class).isEqualTo("Internal Server Error - message from server");
+  }
+
+  @Test
+  void getRequestISEFallback() {
+    webTestClient.get().uri("http://localhost:8080/client/getRequest-ISE-fallback")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Fallback during calling getRequest");
   }
 
 }
