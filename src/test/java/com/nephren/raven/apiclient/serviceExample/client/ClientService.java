@@ -1,5 +1,7 @@
 package com.nephren.raven.apiclient.serviceExample.client;
 
+import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
+import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,10 @@ public class ClientService {
 
   public Mono<ResponseEntity<String>> getRequestWithFallback() {
     return exampleClientWithFallback.getRequestISE();
+  }
+
+  public Mono<ResponseEntity<ServerResponseBody>> postRequest(ServerRequestBody name) {
+    return exampleClient.postRequest(name);
   }
 
 }

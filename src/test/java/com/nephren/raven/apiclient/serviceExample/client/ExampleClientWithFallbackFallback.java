@@ -10,10 +10,6 @@ import reactor.core.publisher.Mono;
 public class ExampleClientWithFallbackFallback implements ExampleClientWithFallback {
 
   @Override
-  public Mono<ResponseEntity<String>> getRequest() {
-    return null;
-  }
-  @Override
   public Mono<ResponseEntity<String>> getRequestISE() {
     log.error("#ExampleClientWithFallbackFallback.getRequest - Fallback during calling getRequest");
     return Mono.just(ResponseEntity.ok("Fallback during calling getRequest"));

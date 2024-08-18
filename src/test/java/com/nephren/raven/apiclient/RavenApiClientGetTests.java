@@ -8,11 +8,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
-class RavenApiClientApplicationTests {
+class RavenApiClientGetTests {
   private final WebTestClient webTestClient;
 
   @Autowired
-  public RavenApiClientApplicationTests(WebTestClient webTestClient) {
+  public RavenApiClientGetTests(WebTestClient webTestClient) {
     this.webTestClient = webTestClient;
   }
   @Test
