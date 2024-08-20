@@ -35,10 +35,4 @@ public class RavenApiConfiguration {
     return new JsonBodyResolver(objectMapper);
   }
 
-  //  @Bean
-  //  @ConditionalOnMissingBean
-  //  public DefaultApiErrorResolver defaultApiErrorResolver() {
-  //    return new DefaultApiErrorResolver();
-  //  }
-
 }

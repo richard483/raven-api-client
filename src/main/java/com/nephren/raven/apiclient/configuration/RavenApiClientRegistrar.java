@@ -111,7 +111,8 @@ public class RavenApiClientRegistrar
     if (StringUtils.hasText(name)) {
       return name;
     }
-    throw new RavenApiException("'name' must be provided in @RavenApiClient", null);
+    throw new RavenApiException(
+        "#RavenApiClientRegistrar 'name' must be provided in @RavenApiClient", null);
   }
 
   private void registerApiClientInterceptor(

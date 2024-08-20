@@ -20,18 +20,7 @@ public class RavenApiClientProperties {
   private Map<String, ApiClientConfigProperties> configs = new HashMap<>();
 
   private String packages;
-
-  //  private ApiClientSleuthProperties sleuth = new ApiClientSleuthProperties();
-  //
-  //  @Data
-  //  @AllArgsConstructor
-  //  @NoArgsConstructor
-  //  public static class ApiClientSleuthProperties {
-  //
-  //    private boolean enabled = true;
-  //
-  //  }
-
+  
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
