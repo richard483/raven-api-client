@@ -71,23 +71,21 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    prepareAttribute();
+    prepareMetadata();
     prepareBodyResolvers();
     prepareWebClient();
     prepareFallback();
     prepareScheduler();
 
   }
-  private void prepareScheduler() {
-    SchedulerHelper schedulerHelper = applicationContext.getBean(SchedulerHelper.class);
-    RavenApiClient ravenApiClient = type.getAnnotation(RavenApiClient.class);
-    if (schedulerHelper.of(ravenApiClient.name()) != Schedulers.immediate()) {
-      scheduler = schedulerHelper.of(ravenApiClient.name());
-    }
+
+  private void prepareMetadata() {
+    metadata = new RequestMappingMetadataBuilder(applicationContext, type, name).build();
   }
 
-  private void prepareAttribute() {
-    metadata = new RequestMappingMetadataBuilder(applicationContext, type, name).build();
+  private void prepareBodyResolvers() {
+    bodyResolvers =
+        new ArrayList<>(applicationContext.getBeansOfType(ApiBodyResolver.class).values());
   }
 
   private void prepareWebClient() {
@@ -120,9 +118,12 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
         .fallbackMetadata(fallbackMetadata).build();
   }
 
-  private void prepareBodyResolvers() {
-    bodyResolvers =
-        new ArrayList<>(applicationContext.getBeansOfType(ApiBodyResolver.class).values());
+  private void prepareScheduler() {
+    SchedulerHelper schedulerHelper = applicationContext.getBean(SchedulerHelper.class);
+    RavenApiClient ravenApiClient = type.getAnnotation(RavenApiClient.class);
+    if (schedulerHelper.of(ravenApiClient.name()) != Schedulers.immediate()) {
+      scheduler = schedulerHelper.of(ravenApiClient.name());
+    }
   }
 
   private ExchangeStrategies getExchangeStrategies() {
@@ -137,7 +138,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private HttpClient getHttpClient() {
-    // TODO: could add more api client customizer
     return HttpClient.create().option(
             ChannelOption.CONNECT_TIMEOUT_MILLIS,
             (int) metadata.getProperties().getConnectTimeout().toMillis())
@@ -171,7 +171,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   private WebClient.RequestHeadersUriSpec<?> doMethod(String methodName) {
     RequestMethod requestMethod = metadata.getRequestMethods().get(methodName);
-    //    requestMethod = RequestMethod.GET; // TODO: need to remove later
     return switch (requestMethod) {
       case RequestMethod.GET -> webClient.get();
       case RequestMethod.POST -> webClient.post();
@@ -193,25 +192,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     } else {
       return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
     }
-  }
-
-  private URI getUri(UriBuilder builder, String methodName, Object[] arguments) {
-    builder.path(metadata.getPaths().get(methodName));
-
-    metadata.getQueryParamPositions().get(methodName).forEach((paramName, position) -> {
-      if (arguments[position] instanceof Collection collection) {
-        builder.queryParam(paramName, collection);
-      } else {
-        builder.queryParam(paramName, arguments[position]);
-      }
-    });
-
-    Map<String, Object> uriVariables = new HashMap<>();
-    metadata.getPathVariablePositions().get(methodName).forEach((paramName, position) -> {
-      uriVariables.put(paramName, arguments[position]);
-    });
-
-    return builder.build(uriVariables);
   }
 
   private WebClient.RequestHeadersSpec<?> doHeader(
@@ -287,6 +267,25 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       return ravenApiClientFallback.invoke(method, arguments, throwable);
     }
     return Mono.error(throwable);
+  }
+
+  private URI getUri(UriBuilder builder, String methodName, Object[] arguments) {
+    builder.path(metadata.getPaths().get(methodName));
+
+    metadata.getQueryParamPositions().get(methodName).forEach((paramName, position) -> {
+      if (arguments[position] instanceof Collection collection) {
+        builder.queryParam(paramName, collection);
+      } else {
+        builder.queryParam(paramName, arguments[position]);
+      }
+    });
+
+    Map<String, Object> uriVariables = new HashMap<>();
+    metadata.getPathVariablePositions().get(methodName).forEach((paramName, position) -> {
+      uriVariables.put(paramName, arguments[position]);
+    });
+
+    return builder.build(uriVariables);
   }
 
 }

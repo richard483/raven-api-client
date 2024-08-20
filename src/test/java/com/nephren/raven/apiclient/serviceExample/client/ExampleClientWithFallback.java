@@ -1,6 +1,7 @@
 package com.nephren.raven.apiclient.serviceExample.client;
 
 import com.nephren.raven.apiclient.annotation.RavenApiClient;
+import com.nephren.raven.apiclient.serviceExample.client.fallback.ExampleClientWithFallbackFallback;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

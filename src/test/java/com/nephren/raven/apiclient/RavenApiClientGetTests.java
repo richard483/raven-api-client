@@ -17,7 +17,7 @@ class RavenApiClientGetTests {
   }
   @Test
   void getRequest() {
-    webTestClient.get().uri("http://localhost:8080/client/getRequest")
+    webTestClient.get().uri("http://localhost:8080/get")
         .exchange()
         .expectStatus()
         .isOk()
@@ -25,7 +25,7 @@ class RavenApiClientGetTests {
   }
   @Test
   void getRequestISE() {
-    webTestClient.get().uri("http://localhost:8080/client/getRequest-ISE")
+    webTestClient.get().uri("http://localhost:8080/get/ISE")
         .exchange()
         .expectStatus()
         .is5xxServerError()
@@ -34,11 +34,48 @@ class RavenApiClientGetTests {
 
   @Test
   void getRequestISEFallback() {
-    webTestClient.get().uri("http://localhost:8080/client/getRequest-ISE-fallback")
+    webTestClient.get().uri("http://localhost:8080/get/ISE-fallback")
         .exchange()
         .expectStatus()
         .isOk()
         .expectBody(String.class).isEqualTo("Fallback during calling getRequest");
+  }
+
+  @Test
+  void getRequestWithHeader() {
+    webTestClient.get().uri("http://localhost:8080/get/withHeader")
+        .header("X-Test-Header", "Hola!")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with header: Hola!");
+  }
+
+  @Test
+  void getRequestWithHeader2() {
+    webTestClient.get().uri("http://localhost:8080/get/withHeader2")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with header: Hola!");
+  }
+
+  @Test
+  void getRequestWithQueryParam() {
+    webTestClient.get().uri("http://localhost:8080/get/withQueryParam?name=Richard&age=22")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with name: Richard and age: 22");
+  }
+
+  @Test
+  void getRequestWithPathVariable() {
+    webTestClient.get().uri("http://localhost:8080/get/withPathVariable/TowaSama")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with path variable: TowaSama");
   }
 
 }

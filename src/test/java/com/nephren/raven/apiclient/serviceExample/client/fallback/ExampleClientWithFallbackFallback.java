@@ -1,5 +1,6 @@
-package com.nephren.raven.apiclient.serviceExample.client;
+package com.nephren.raven.apiclient.serviceExample.client.fallback;
 
+import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithFallback;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

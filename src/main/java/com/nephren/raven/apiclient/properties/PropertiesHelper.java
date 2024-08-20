@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class PropertiesHelper {
 
-  public static void copyConfigProperties(
+  public static void copyConfigPropertiesFromSourceToTarget(
       RavenApiClientProperties.ApiClientConfigProperties source,
       RavenApiClientProperties.ApiClientConfigProperties target) {
     if (source != null) {
@@ -12,10 +12,10 @@ public class PropertiesHelper {
       if (Objects.nonNull(source.getUrl())) {
         target.setUrl(source.getUrl());
       }
-      //
-      //      if (Objects.nonNull(source.getFallback())) {
-      //        target.setFallback(source.getFallback());
-      //      }
+
+      if (Objects.nonNull(source.getFallback())) {
+        target.setFallback(source.getFallback());
+      }
 
       if (Objects.nonNull(source.getReadTimeout())) {
         target.setReadTimeout(source.getReadTimeout());

@@ -22,7 +22,7 @@ class RavenApiClientPostTests {
   void postRequest() {
     ServerRequestBody requestBody = ServerRequestBody.builder().name("Richard").build();
     ServerResponseBody expected = ServerResponseBody.builder().message("Hello, Richard!").build();
-    webTestClient.post().uri("http://localhost:8080/client/postRequest")
+    webTestClient.post().uri("http://localhost:8080/post")
         .bodyValue(requestBody)
         .exchange()
         .expectStatus()
