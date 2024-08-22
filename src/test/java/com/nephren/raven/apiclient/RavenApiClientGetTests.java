@@ -78,4 +78,15 @@ class RavenApiClientGetTests {
         .expectBody(String.class).isEqualTo("Message received with path variable: TowaSama");
   }
 
+  @Test
+  void getRequestWithCookieParam() {
+    webTestClient.get().uri("http://localhost:8080/get/withCookieParam")
+        .cookie("username", "TowaSama")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo("Message received and contain username cookie of TowaSama");
+  }
+
 }

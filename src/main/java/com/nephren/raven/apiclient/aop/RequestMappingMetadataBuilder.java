@@ -66,10 +66,10 @@ public class RequestMappingMetadataBuilder {
     prepareHeaderParams();
     prepareQueryParams();
     preparePathVariables();
+    prepareCookieParams();
     prepareResponseBodyClasses();
     prepareRequestMethods();
     preparePaths();
-    prepareCookieParams();
 
     prepareContentTypes();
     return RequestMappingMetadata.builder()
@@ -182,6 +182,16 @@ public class RequestMappingMetadataBuilder {
     });
   }
 
+  private void prepareCookieParams() {
+    methods.forEach((methodName, method) -> {
+      if (isMethodHasRequestMappingAnnotation(method)) {
+        Parameter[] parameters = method.getParameters();
+        Map<String, Integer> cookieParamPosition = parametersToMap(parameters, CookieValue.class);
+        cookieParamPositions.put(methodName, cookieParamPosition);
+      }
+    });
+  }
+
   private <T extends Annotation> Map<String, Integer> parametersToMap(
       Parameter[] parameters,
       Class<T> parameterAnnotationClass) {
@@ -246,16 +256,6 @@ public class RequestMappingMetadataBuilder {
       } else {
         requestMethods.put(methodName, RequestMethod.GET);
       }
-      // TODO: check if this is correct, because it different from the reference code
-
-      //      if (requestMapping != null) {
-      //        RequestMethod[] methods = requestMapping.method();
-      //        if (methods.length > 0) {
-      //          requestMethods.put(methodName, methods[0]);
-      //        } else {
-      //          requestMethods.put(methodName, RequestMethod.GET);
-      //        }
-      //      }
     });
   }
 
@@ -269,32 +269,6 @@ public class RequestMappingMetadataBuilder {
           paths.put(methodName, pathValues[0]);
         } else {
           paths.put(methodName, "");
-        }
-      }
-    });
-  }
-
-  private void prepareCookieParams() {
-    methods.forEach((methodName, method) -> {
-      if (isMethodHasRequestMappingAnnotation(method)) {
-        Parameter[] parameters = method.getParameters();
-        Map<String, Integer> cookieParamPosition = new HashMap<>();
-        cookieParamPositions.put(methodName, cookieParamPosition);
-
-        if (parameters.length > 0) {
-          for (int i = 0;
-               i < parameters.length;
-               i++) {
-            Parameter parameter = parameters[i];
-            CookieValue annotation = parameter.getAnnotation(CookieValue.class);
-            if (annotation != null) {
-              String name =
-                  annotation.name().isEmpty() ? annotation.value() : annotation.name();
-              if (!name.isEmpty()) {
-                cookieParamPosition.put(name, i);
-              }
-            }
-          }
         }
       }
     });

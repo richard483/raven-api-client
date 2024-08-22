@@ -3,6 +3,7 @@ package com.nephren.raven.apiclient.serviceExample.controller;
 import com.nephren.raven.apiclient.serviceExample.service.GETClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +52,12 @@ public class GETController {
   public Mono<ResponseEntity<String>> getRequestWithPathVariable(
       @PathVariable(value = "var") String var) {
     return clientService.getRequestWithPathVariable(var);
+  }
+
+  @GetMapping("/withCookieParam")
+  public Mono<ResponseEntity<String>> getRequestWithCookieParam(
+      @CookieValue("username") String username) {
+    return clientService.getRequestWithCookieParam(username);
   }
 
 }

@@ -5,6 +5,7 @@ import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +45,11 @@ public interface ExampleClient {
 
   @GetMapping(path = "/getRequest-pathVariable/{variable}")
   Mono<ResponseEntity<String>> getRequestPathVariable(@PathVariable("variable") String variable);
+
+  @GetMapping(value = "/getRequest-cookieParam",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<String>> getRequestWithCookieParam(@CookieValue("username") String username);
 
   @PostMapping(value = "/postRequest",
       produces = MediaType.APPLICATION_JSON_VALUE,

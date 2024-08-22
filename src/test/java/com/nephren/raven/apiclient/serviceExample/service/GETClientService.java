@@ -43,4 +43,8 @@ public class GETClientService {
     return exampleClient.getRequestPathVariable(var);
   }
 
+  public Mono<ResponseEntity<String>> getRequestWithCookieParam(String username) {
+    return exampleClient.getRequestWithCookieParam(username);
+  }
+
 }
