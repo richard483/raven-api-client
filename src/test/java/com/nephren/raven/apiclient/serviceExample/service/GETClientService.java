@@ -1,7 +1,7 @@
 package com.nephren.raven.apiclient.serviceExample.service;
 
-import com.nephren.raven.apiclient.serviceExample.client.ExampleClient;
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithFallback;
+import com.nephren.raven.apiclient.serviceExample.client.GETExampleClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,16 +10,16 @@ import reactor.core.publisher.Mono;
 @Service
 public class GETClientService {
   @Autowired
-  private ExampleClient exampleClient;
+  private GETExampleClient getExampleClient;
 
   @Autowired
   private ExampleClientWithFallback exampleClientWithFallback;
 
   public Mono<ResponseEntity<String>> getRequest() {
-    return exampleClient.getRequest();
+    return getExampleClient.getRequest();
   }
   public Mono<ResponseEntity<String>> getRequestISE() {
-    return exampleClient.getRequestISE();
+    return getExampleClient.getRequestISE();
   }
 
   public Mono<ResponseEntity<String>> getRequestWithFallback() {
@@ -27,24 +27,24 @@ public class GETClientService {
   }
 
   public Mono<ResponseEntity<String>> getRequestWithHeader(String header) {
-    return exampleClient.getRequestWithHeader(header);
+    return getExampleClient.getRequestWithHeader(header);
   }
 
   public Mono<ResponseEntity<String>> getRequestWithHeader2() {
-    return exampleClient.getRequestWithHeader2();
+    return getExampleClient.getRequestWithHeader2();
   }
 
   public Mono<ResponseEntity<String>> getRequestWithQueryParam(
       String nameQueryParam, String ageQueryParam) {
-    return exampleClient.getRequestWithQueryParam(nameQueryParam, ageQueryParam);
+    return getExampleClient.getRequestWithQueryParam(nameQueryParam, ageQueryParam);
   }
 
   public Mono<ResponseEntity<String>> getRequestWithPathVariable(String var) {
-    return exampleClient.getRequestPathVariable(var);
+    return getExampleClient.getRequestPathVariable(var);
   }
 
   public Mono<ResponseEntity<String>> getRequestWithCookieParam(String username) {
-    return exampleClient.getRequestWithCookieParam(username);
+    return getExampleClient.getRequestWithCookieParam(username);
   }
 
 }

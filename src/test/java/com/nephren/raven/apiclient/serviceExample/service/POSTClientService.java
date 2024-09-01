@@ -1,6 +1,6 @@
 package com.nephren.raven.apiclient.serviceExample.service;
 
-import com.nephren.raven.apiclient.serviceExample.client.ExampleClient;
+import com.nephren.raven.apiclient.serviceExample.client.POSTExampleClient;
 import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +11,10 @@ import reactor.core.publisher.Mono;
 @Service
 public class POSTClientService {
   @Autowired
-  private ExampleClient exampleClient;
+  private POSTExampleClient postExampleClient;
 
   public Mono<ResponseEntity<ServerResponseBody>> postRequest(ServerRequestBody name) {
-    return exampleClient.postRequest(name);
+    return postExampleClient.postRequest(name);
   }
 
 }
