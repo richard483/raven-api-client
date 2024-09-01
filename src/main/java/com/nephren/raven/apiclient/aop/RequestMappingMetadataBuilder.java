@@ -2,34 +2,21 @@ package com.nephren.raven.apiclient.aop;
 
 import com.nephren.raven.apiclient.properties.PropertiesHelper;
 import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class RequestMappingMetadataBuilder {
@@ -119,7 +106,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareHeaders() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
+      RavenRequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
         HttpHeaders httpHeaders = new HttpHeaders();
 
@@ -248,7 +235,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareRequestMethods() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
+      RavenRequestMapping requestMapping = getRequestMappingAnnotation(method);
 
       if (requestMapping != null && requestMapping.method().length > 0) {
         RequestMethod[] methods = requestMapping.method();
@@ -261,7 +248,7 @@ public class RequestMappingMetadataBuilder {
 
   private void preparePaths() {
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
+      RavenRequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
         String[] pathValues =
             requestMapping.path().length > 0 ? requestMapping.path() : requestMapping.value();
@@ -277,7 +264,7 @@ public class RequestMappingMetadataBuilder {
   private void prepareContentTypes() {
     String defaultContentType = getDefaultContentType();
     methods.forEach((methodName, method) -> {
-      RequestMapping requestMapping = getRequestMappingAnnotation(method);
+      RavenRequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
         String[] consumes = requestMapping.consumes();
         if (consumes.length > 0) {
@@ -326,7 +313,7 @@ public class RequestMappingMetadataBuilder {
       String[] headers = (String[]) annotation.getClass().getMethod("headers").invoke(annotation);
       String[] path = (String[]) annotation.getClass().getMethod("path").invoke(annotation);
       String[] value = (String[]) annotation.getClass().getMethod("value").invoke(annotation);
-      RequestMethod[] methodValue = new RequestMethod[] {getRequestMethod(annotationType)};
+      RequestMethod[] methodValue = new RequestMethod[]{getRequestMethod(annotationType)};
       return RavenRequestMapping.builder()
           .consumes(consumes)
           .produces(produces)
