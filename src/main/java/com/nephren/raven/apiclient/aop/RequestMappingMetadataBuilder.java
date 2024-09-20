@@ -34,6 +34,15 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class RequestMappingMetadataBuilder {
 
+  private static final Class[] mappingAnnotation = {
+      GetMapping.class,
+      PutMapping.class,
+      PostMapping.class,
+      PatchMapping.class,
+      DeleteMapping.class,
+      RequestMapping.class
+  };
+
   private final Map<String, MultiValueMap<String, String>> headers = new HashMap<>();
   private final Map<String, Integer> apiUrlPositions = new HashMap<>();
   private final Map<String, Map<String, Integer>> queryParamPositions = new HashMap<>();
@@ -111,7 +120,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareMethods() {
     methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(type))
-        .filter(this::isMethodHasRequestMappingAnnotation)
+        .filter(method -> getRequestMappingAnnotation(method) != null)
         .collect(Collectors.toMap(java.lang.reflect.Method::getName, method -> method));
     // TODO:
     // check if this is correct, because it different from the reference code
@@ -154,7 +163,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareHeaderParams() {
     methods.forEach((methodName, method) -> {
-      if (isMethodHasRequestMappingAnnotation(method)) {
+      if (getRequestMappingAnnotation(method) != null) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> headerParamPosition = parametersToMap(parameters, RequestHeader.class);
         headerParamPositions.put(methodName, headerParamPosition);
@@ -164,7 +173,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareQueryParams() {
     methods.forEach((methodName, method) -> {
-      if (isMethodHasRequestMappingAnnotation(method)) {
+      if (getRequestMappingAnnotation(method) != null) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> queryParamPosition = parametersToMap(parameters, RequestParam.class);
         queryParamPositions.put(methodName, queryParamPosition);
@@ -174,7 +183,7 @@ public class RequestMappingMetadataBuilder {
 
   private void preparePathVariables() {
     methods.forEach((methodName, method) -> {
-      if (isMethodHasRequestMappingAnnotation(method)) {
+      if (getRequestMappingAnnotation(method) != null) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> pathVariablePosition = parametersToMap(parameters, PathVariable.class);
         pathVariablePositions.put(methodName, pathVariablePosition);
@@ -184,7 +193,7 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareCookieParams() {
     methods.forEach((methodName, method) -> {
-      if (isMethodHasRequestMappingAnnotation(method)) {
+      if (getRequestMappingAnnotation(method) != null) {
         Parameter[] parameters = method.getParameters();
         Map<String, Integer> cookieParamPosition = parametersToMap(parameters, CookieValue.class);
         cookieParamPositions.put(methodName, cookieParamPosition);
@@ -289,28 +298,11 @@ public class RequestMappingMetadataBuilder {
     });
   }
 
-  private boolean isMethodHasRequestMappingAnnotation(Method method) {
-    return method.getAnnotation(GetMapping.class) != null
-        || method.getAnnotation(PutMapping.class) != null
-        || method.getAnnotation(PostMapping.class) != null
-        || method.getAnnotation(PatchMapping.class) != null
-        || method.getAnnotation(DeleteMapping.class) != null
-        || method.getAnnotation(RequestMapping.class) != null;
-  }
-
   private RavenRequestMapping getRequestMappingAnnotation(Method method) {
-    if (method.getAnnotation(GetMapping.class) != null) {
-      return getAnnotation(method, GetMapping.class);
-    } else if (method.getAnnotation(PutMapping.class) != null) {
-      return getAnnotation(method, PutMapping.class);
-    } else if (method.getAnnotation(PostMapping.class) != null) {
-      return getAnnotation(method, PostMapping.class);
-    } else if (method.getAnnotation(PatchMapping.class) != null) {
-      return getAnnotation(method, PatchMapping.class);
-    } else if (method.getAnnotation(DeleteMapping.class) != null) {
-      return getAnnotation(method, DeleteMapping.class);
-    } else if (method.getAnnotation(RequestMapping.class) != null) {
-      return getAnnotation(method, RequestMapping.class);
+    for (Class annotation : mappingAnnotation) {
+      if (method.getAnnotation(annotation) != null) {
+        return getAnnotation(method, annotation);
+      }
     }
     return null;
   }
