@@ -224,20 +224,14 @@ public class RequestMappingMetadataBuilder {
   private void prepareResponseBodyClasses() {
     methods.forEach((methodName, method) -> {
       ParameterizedType parameterizedType = (ParameterizedType) method.getGenericReturnType();
-      if (!parameterizedType.getRawType().getTypeName().equals(Mono.class.getName())) {
+      if (!parameterizedType.getRawType().equals(Mono.class)) {
         throw new BeanCreationException(
             String.format("#RavenApiClient method must return reactive, %s is not reactive",
                 methodName));
       }
 
       Type[] typeArguments = parameterizedType.getActualTypeArguments();
-      if (typeArguments.length != 1) {
-        throw new BeanCreationException(
-            String.format("#RavenApiClient method must return 1 generic type, %s generic type is "
-                    + "not 1",
-                methodName));
-      }
-
+      
       responseBodyClasses.put(methodName, typeArguments[0]);
     });
   }
