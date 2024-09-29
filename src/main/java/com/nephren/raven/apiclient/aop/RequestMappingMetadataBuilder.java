@@ -226,12 +226,13 @@ public class RequestMappingMetadataBuilder {
       ParameterizedType parameterizedType = (ParameterizedType) method.getGenericReturnType();
       if (!parameterizedType.getRawType().equals(Mono.class)) {
         throw new BeanCreationException(
-            String.format("#RavenApiClient method must return reactive, %s is not reactive",
+            String.format("#RavenApiClient method must return the type of reactor.core.publisher Mono, %s is not the " +
+                    "type of reactor's Mono",
                 methodName));
       }
 
       Type[] typeArguments = parameterizedType.getActualTypeArguments();
-      
+
       responseBodyClasses.put(methodName, typeArguments[0]);
     });
   }
