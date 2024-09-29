@@ -314,7 +314,6 @@ public class RequestMappingMetadataBuilder {
       e.printStackTrace();
     }
     return null;
-
   }
 
   private RequestMethod getRequestMethod(Class clazz) {

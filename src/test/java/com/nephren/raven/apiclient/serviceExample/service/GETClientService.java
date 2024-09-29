@@ -15,9 +15,14 @@ public class GETClientService {
   @Autowired
   private ExampleClientWithFallback exampleClientWithFallback;
 
+  public Mono<ResponseEntity<String>> getRequestNoPath() {
+    return getExampleClient.getRequestNoPath();
+  }
+
   public Mono<ResponseEntity<String>> getRequest() {
     return getExampleClient.getRequest();
   }
+
   public Mono<ResponseEntity<String>> getRequestISE() {
     return getExampleClient.getRequestISE();
   }
@@ -32,6 +37,10 @@ public class GETClientService {
 
   public Mono<ResponseEntity<String>> getRequestWithHeader2() {
     return getExampleClient.getRequestWithHeader2();
+  }
+
+  public Mono<ResponseEntity<String>> getRequestWithHeader3() {
+    return getExampleClient.getRequestWithHeader3();
   }
 
   public Mono<ResponseEntity<String>> getRequestWithQueryParam(

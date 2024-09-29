@@ -3,12 +3,7 @@ package com.nephren.raven.apiclient.serviceExample.controller;
 import com.nephren.raven.apiclient.serviceExample.service.GETClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -16,6 +11,11 @@ import reactor.core.publisher.Mono;
 public class GETController {
   @Autowired
   private GETClientService clientService;
+
+  @GetMapping("/no-path")
+  public Mono<ResponseEntity<String>> getRequestNoPath() {
+    return clientService.getRequestNoPath();
+  }
 
   @GetMapping()
   public Mono<ResponseEntity<String>> getRequest() {
@@ -40,6 +40,11 @@ public class GETController {
   @GetMapping("/withHeader2")
   public Mono<ResponseEntity<String>> getRequestWithHeader2() {
     return clientService.getRequestWithHeader2();
+  }
+
+  @GetMapping("/withHeader3")
+  public Mono<ResponseEntity<String>> getRequestWithHeader3() {
+    return clientService.getRequestWithHeader3();
   }
 
   @GetMapping("/withQueryParam")

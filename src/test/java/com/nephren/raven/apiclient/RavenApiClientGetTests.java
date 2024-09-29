@@ -15,6 +15,7 @@ class RavenApiClientGetTests {
   public RavenApiClientGetTests(WebTestClient webTestClient) {
     this.webTestClient = webTestClient;
   }
+
   @Test
   void getRequest() {
     webTestClient.get().uri("http://localhost:8080/get")
@@ -23,6 +24,7 @@ class RavenApiClientGetTests {
         .isOk()
         .expectBody(String.class).isEqualTo("Hello, World!");
   }
+
   @Test
   void getRequestISE() {
     webTestClient.get().uri("http://localhost:8080/get/ISE")
@@ -58,6 +60,15 @@ class RavenApiClientGetTests {
         .expectStatus()
         .isOk()
         .expectBody(String.class).isEqualTo("Message received with header: Hola!");
+  }
+
+  @Test
+  void getRequestWithHeader3() {
+    webTestClient.get().uri("http://localhost:8080/get/withHeader3")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with header: ");
   }
 
   @Test
