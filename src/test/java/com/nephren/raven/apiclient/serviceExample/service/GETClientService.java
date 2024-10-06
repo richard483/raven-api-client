@@ -1,6 +1,7 @@
 package com.nephren.raven.apiclient.serviceExample.service;
 
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithFallback;
+import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithOtherFallback;
 import com.nephren.raven.apiclient.serviceExample.client.GETExampleClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,9 @@ public class GETClientService {
 
   @Autowired
   private ExampleClientWithFallback exampleClientWithFallback;
+
+  @Autowired
+  private ExampleClientWithOtherFallback exampleClientWithOtherFallback;
 
   public Mono<ResponseEntity<String>> getRequestNoPath() {
     return getExampleClient.getRequestNoPath();
@@ -29,6 +33,10 @@ public class GETClientService {
 
   public Mono<ResponseEntity<String>> getRequestWithFallback() {
     return exampleClientWithFallback.getRequestISE();
+  }
+
+  public Mono<ResponseEntity<String>> getRequestWithOtherFallback() {
+    return exampleClientWithOtherFallback.getRequestISE();
   }
 
   public Mono<ResponseEntity<String>> getRequestWithHeader(String header) {

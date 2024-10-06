@@ -53,6 +53,15 @@ class RavenApiClientGetTests {
   }
 
   @Test
+  void getRequestISEOtherFallback() {
+    webTestClient.get().uri("http://localhost:8080/get/ISE-other-fallback")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Fallback during calling getRequest");
+  }
+
+  @Test
   void getRequestWithHeader() {
     webTestClient.get().uri("http://localhost:8080/get/withHeader")
         .header("X-Test-Header", "Hola!")
