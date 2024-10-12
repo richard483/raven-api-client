@@ -49,7 +49,7 @@ class RavenApiClientGetTests {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class).isEqualTo("Fallback during calling getRequest");
+        .expectBody(String.class).isEqualTo("Fallback during calling getRequestISE");
   }
 
   @Test
@@ -58,7 +58,7 @@ class RavenApiClientGetTests {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class).isEqualTo("Fallback during calling getRequest");
+        .expectBody(String.class).isEqualTo("Fallback during calling getRequestISE");
   }
 
   @Test
