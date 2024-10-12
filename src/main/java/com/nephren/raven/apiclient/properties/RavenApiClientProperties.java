@@ -1,14 +1,15 @@
 package com.nephren.raven.apiclient.properties;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -20,13 +21,13 @@ public class RavenApiClientProperties {
   private Map<String, ApiClientConfigProperties> configs = new HashMap<>();
 
   private String packages;
-  
+
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
   public static class ApiClientConfigProperties {
 
-    private String url;
+    private String url = "localhost";
 
     private Class<?> fallback;
 
