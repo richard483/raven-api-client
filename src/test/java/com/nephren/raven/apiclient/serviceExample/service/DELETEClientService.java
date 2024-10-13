@@ -8,8 +8,13 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class DELETEClientService {
+
+  private final DELETEExampleClient deleteExampleClient;
+
   @Autowired
-  private DELETEExampleClient deleteExampleClient;
+  public DELETEClientService(DELETEExampleClient deleteExampleClient) {
+    this.deleteExampleClient = deleteExampleClient;
+  }
 
   public Mono<ResponseEntity<String>> deleteRequest() {
     return deleteExampleClient.deleteRequest();

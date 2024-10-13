@@ -10,8 +10,13 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class PATCHClientService {
+
+  private final PATCHExampleClient patchExampleClient;
+
   @Autowired
-  private PATCHExampleClient patchExampleClient;
+  public PATCHClientService(PATCHExampleClient patchExampleClient) {
+    this.patchExampleClient = patchExampleClient;
+  }
 
   public Mono<ResponseEntity<ServerResponseBody>> patchRequest(ServerRequestBody name) {
     return patchExampleClient.patchRequest(name);

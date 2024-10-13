@@ -14,8 +14,13 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("post")
 public class POSTController {
+
+  private final POSTClientService clientService;
+
   @Autowired
-  private POSTClientService clientService;
+  public POSTController(POSTClientService clientService) {
+    this.clientService = clientService;
+  }
 
   @PostMapping()
   public Mono<ResponseEntity<ServerResponseBody>> postRequest(@RequestBody ServerRequestBody body) {

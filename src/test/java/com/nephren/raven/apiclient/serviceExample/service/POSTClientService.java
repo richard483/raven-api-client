@@ -10,8 +10,13 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class POSTClientService {
+
+  private final POSTExampleClient postExampleClient;
+
   @Autowired
-  private POSTExampleClient postExampleClient;
+  public POSTClientService(POSTExampleClient postExampleClient) {
+    this.postExampleClient = postExampleClient;
+  }
 
   public Mono<ResponseEntity<ServerResponseBody>> postRequest(ServerRequestBody name) {
     return postExampleClient.postRequest(name);

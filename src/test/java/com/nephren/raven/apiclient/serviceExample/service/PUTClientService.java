@@ -10,8 +10,13 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class PUTClientService {
+
+  private final PUTExampleClient putExampleClient;
+
   @Autowired
-  private PUTExampleClient putExampleClient;
+  public PUTClientService(PUTExampleClient putExampleClient) {
+    this.putExampleClient = putExampleClient;
+  }
 
   public Mono<ResponseEntity<ServerResponseBody>> putRequest(ServerRequestBody name) {
     return putExampleClient.putRequest(name);

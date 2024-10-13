@@ -14,8 +14,13 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("put")
 public class PUTController {
+
+  private final PUTClientService clientService;
+
   @Autowired
-  private PUTClientService clientService;
+  public PUTController(PUTClientService clientService) {
+    this.clientService = clientService;
+  }
 
   @PutMapping()
   public Mono<ResponseEntity<ServerResponseBody>> putRequest(@RequestBody ServerRequestBody body) {

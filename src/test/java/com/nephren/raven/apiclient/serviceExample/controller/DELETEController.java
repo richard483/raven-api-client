@@ -11,8 +11,13 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("delete")
 public class DELETEController {
+
+  private final DELETEClientService clientService;
+
   @Autowired
-  private DELETEClientService clientService;
+  public DELETEController(DELETEClientService clientService) {
+    this.clientService = clientService;
+  }
 
   @DeleteMapping()
   public Mono<ResponseEntity<String>> deleteRequest() {

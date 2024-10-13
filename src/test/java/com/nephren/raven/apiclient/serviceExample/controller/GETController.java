@@ -9,8 +9,13 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("get")
 public class GETController {
+
+  private final GETClientService clientService;
+
   @Autowired
-  private GETClientService clientService;
+  public GETController(GETClientService clientService) {
+    this.clientService = clientService;
+  }
 
   @GetMapping("/no-path")
   public Mono<ResponseEntity<String>> getRequestNoPath() {

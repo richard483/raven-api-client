@@ -14,8 +14,13 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("patch")
 public class PATCHController {
+
+  private final PATCHClientService clientService;
+
   @Autowired
-  private PATCHClientService clientService;
+  public PATCHController(PATCHClientService clientService) {
+    this.clientService = clientService;
+  }
 
   @PatchMapping()
   public Mono<ResponseEntity<ServerResponseBody>> patchRequest(@RequestBody ServerRequestBody body) {

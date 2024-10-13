@@ -10,14 +10,21 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class GETClientService {
-  @Autowired
-  private GETExampleClient getExampleClient;
+
+  private final GETExampleClient getExampleClient;
+
+  private final ExampleClientWithFallback exampleClientWithFallback;
+
+  private final ExampleClientWithOtherFallback exampleClientWithOtherFallback;
 
   @Autowired
-  private ExampleClientWithFallback exampleClientWithFallback;
-
-  @Autowired
-  private ExampleClientWithOtherFallback exampleClientWithOtherFallback;
+  public GETClientService(GETExampleClient getExampleClient,
+                          ExampleClientWithFallback exampleClientWithFallback,
+                          ExampleClientWithOtherFallback exampleClientWithOtherFallback) {
+    this.getExampleClient = getExampleClient;
+    this.exampleClientWithFallback = exampleClientWithFallback;
+    this.exampleClientWithOtherFallback = exampleClientWithOtherFallback;
+  }
 
   public Mono<ResponseEntity<String>> getRequestNoPath() {
     return getExampleClient.getRequestNoPath();
