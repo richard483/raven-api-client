@@ -1,15 +1,16 @@
 package com.nephren.raven.apiclient.serviceExample.server;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
 public class GETServerController {
+
+  @GetMapping(path = "/")
+  public Mono<ResponseEntity<String>> getRequestNoPath() {
+    return Mono.just(ResponseEntity.ok("Hello, World!"));
+  }
 
   @GetMapping(path = "/getRequest")
   public Mono<ResponseEntity<String>> getRequest() {
@@ -41,6 +42,13 @@ public class GETServerController {
       @PathVariable("variable") String variable) {
     return Mono.just(ResponseEntity.ok()
         .body("Message received with path variable: " + variable));
+  }
+
+  @GetMapping(path = "/getRequest-cookieParam")
+  public Mono<ResponseEntity<String>> getRequestCookieParam(
+      @CookieValue("username") String username) {
+    return Mono.just(ResponseEntity.ok()
+        .body("Message received and contain username cookie of " + username));
   }
 
 }

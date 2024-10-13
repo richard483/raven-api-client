@@ -12,8 +12,8 @@ public class ExampleClientWithFallbackFallback implements ExampleClientWithFallb
 
   @Override
   public Mono<ResponseEntity<String>> getRequestISE() {
-    log.error("#ExampleClientWithFallbackFallback.getRequest - Fallback during calling getRequest");
-    return Mono.just(ResponseEntity.ok("Fallback during calling getRequest"));
+    log.error("#ExampleClientWithFallbackFallback.getRequest - Fallback during calling getRequestISE");
+    return Mono.just(ResponseEntity.ok("Fallback during calling getRequestISE"));
   }
 
 }

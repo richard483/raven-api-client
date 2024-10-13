@@ -2,29 +2,29 @@ package com.nephren.raven.apiclient.serviceExample.controller;
 
 import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
-import com.nephren.raven.apiclient.serviceExample.service.POSTClientService;
+import com.nephren.raven.apiclient.serviceExample.service.PATCHClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("post")
-public class POSTController {
+@RequestMapping("patch")
+public class PATCHController {
 
-  private final POSTClientService clientService;
+  private final PATCHClientService clientService;
 
   @Autowired
-  public POSTController(POSTClientService clientService) {
+  public PATCHController(PATCHClientService clientService) {
     this.clientService = clientService;
   }
 
-  @PostMapping()
-  public Mono<ResponseEntity<ServerResponseBody>> postRequest(@RequestBody ServerRequestBody body) {
-    return clientService.postRequest(body);
+  @PatchMapping()
+  public Mono<ResponseEntity<ServerResponseBody>> patchRequest(@RequestBody ServerRequestBody body) {
+    return clientService.patchRequest(body);
   }
 
 }

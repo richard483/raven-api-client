@@ -15,6 +15,7 @@ class RavenApiClientGetTests {
   public RavenApiClientGetTests(WebTestClient webTestClient) {
     this.webTestClient = webTestClient;
   }
+
   @Test
   void getRequest() {
     webTestClient.get().uri("http://localhost:8080/get")
@@ -23,6 +24,16 @@ class RavenApiClientGetTests {
         .isOk()
         .expectBody(String.class).isEqualTo("Hello, World!");
   }
+
+  @Test
+  void getRequestNoPath() {
+    webTestClient.get().uri("http://localhost:8080/get/no-path")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Hello, World!");
+  }
+
   @Test
   void getRequestISE() {
     webTestClient.get().uri("http://localhost:8080/get/ISE")
@@ -38,7 +49,25 @@ class RavenApiClientGetTests {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class).isEqualTo("Fallback during calling getRequest");
+        .expectBody(String.class).isEqualTo("Fallback during calling getRequestISE");
+  }
+
+  @Test
+  void getRequestISEOtherFallback() {
+    webTestClient.get().uri("http://localhost:8080/get/ISE-other-fallback")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Fallback during calling getRequestISE");
+  }
+
+  @Test
+  void getRequestISEWithThrowableParam() {
+    webTestClient.get().uri("http://localhost:8080/get/ISE-other-fallback-throwable")
+        .exchange()
+        .expectStatus()
+        .is5xxServerError()
+        .expectBody(String.class).isEqualTo("Connection refused: getsockopt: localhost/127.0.0.1:8081");
   }
 
   @Test
@@ -61,6 +90,15 @@ class RavenApiClientGetTests {
   }
 
   @Test
+  void getRequestWithHeader3() {
+    webTestClient.get().uri("http://localhost:8080/get/withHeader3")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with header: ");
+  }
+
+  @Test
   void getRequestWithQueryParam() {
     webTestClient.get().uri("http://localhost:8080/get/withQueryParam?name=Richard&age=22")
         .exchange()
@@ -76,6 +114,17 @@ class RavenApiClientGetTests {
         .expectStatus()
         .isOk()
         .expectBody(String.class).isEqualTo("Message received with path variable: TowaSama");
+  }
+
+  @Test
+  void getRequestWithCookieParam() {
+    webTestClient.get().uri("http://localhost:8080/get/withCookieParam")
+        .cookie("username", "TowaSama")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo("Message received and contain username cookie of TowaSama");
   }
 
 }
