@@ -280,7 +280,8 @@ public class RequestMappingMetadataBuilder {
 
   private RavenRequestMapping getRequestMappingAnnotation(Method method) {
     for (Class annotation : mappingAnnotation) {
-      if (method.getAnnotation(annotation) != null) {
+      Annotation methodAnnotation = method.getAnnotation(annotation);
+      if (methodAnnotation != null) {
         return getAnnotation(method, annotation);
       }
     }
