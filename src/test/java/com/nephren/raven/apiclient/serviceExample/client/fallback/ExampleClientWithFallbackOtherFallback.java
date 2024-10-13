@@ -1,6 +1,7 @@
 package com.nephren.raven.apiclient.serviceExample.client.fallback;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -16,7 +17,7 @@ public class ExampleClientWithFallbackOtherFallback {
 
   public Mono<ResponseEntity<String>> getRequestISEWithThrowableParam(Throwable throwable) {
     log.error("#ExampleClientWithFallbackOtherFallback.getRequestISEWithThrowableParam - Fallback during calling getRequestISE");
-    return Mono.just(ResponseEntity.ok(throwable.getMessage()));
+    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(throwable.getMessage()));
   }
 
 }
