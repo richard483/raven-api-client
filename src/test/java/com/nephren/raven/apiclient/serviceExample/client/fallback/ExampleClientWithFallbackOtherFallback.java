@@ -14,4 +14,9 @@ public class ExampleClientWithFallbackOtherFallback {
     return Mono.just(ResponseEntity.ok("Fallback during calling getRequestISE"));
   }
 
+  public Mono<ResponseEntity<String>> getRequestISEWithThrowableParam(Throwable throwable) {
+    log.error("#ExampleClientWithFallbackOtherFallback.getRequestISEWithThrowableParam - Fallback during calling getRequestISE");
+    return Mono.just(ResponseEntity.ok(throwable.getMessage()));
+  }
+
 }

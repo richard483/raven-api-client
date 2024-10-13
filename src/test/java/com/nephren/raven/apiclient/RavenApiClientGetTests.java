@@ -62,6 +62,15 @@ class RavenApiClientGetTests {
   }
 
   @Test
+  void getRequestISEWithThrowableParam() {
+    webTestClient.get().uri("http://localhost:8080/get/ISE-other-fallback-throwable")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Connection refused: getsockopt: localhost/127.0.0.1:8081");
+  }
+
+  @Test
   void getRequestWithHeader() {
     webTestClient.get().uri("http://localhost:8080/get/withHeader")
         .header("X-Test-Header", "Hola!")

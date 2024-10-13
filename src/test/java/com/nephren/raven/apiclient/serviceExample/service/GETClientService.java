@@ -39,6 +39,10 @@ public class GETClientService {
     return exampleClientWithOtherFallback.getRequestISE();
   }
 
+  public Mono<ResponseEntity<String>> getRequestISEWithThrowableParam() {
+    return exampleClientWithOtherFallback.getRequestISEWithThrowableParam();
+  }
+
   public Mono<ResponseEntity<String>> getRequestWithHeader(String header) {
     return getExampleClient.getRequestWithHeader(header);
   }

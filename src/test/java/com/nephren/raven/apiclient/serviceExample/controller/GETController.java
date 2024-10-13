@@ -37,6 +37,11 @@ public class GETController {
     return clientService.getRequestWithOtherFallback();
   }
 
+  @GetMapping("/ISE-other-fallback-throwable")
+  public Mono<ResponseEntity<String>> getRequestISEWithOtherFallbackWithThrowableParam() {
+    return clientService.getRequestISEWithThrowableParam();
+  }
+
   @GetMapping("/withHeader")
   public Mono<ResponseEntity<String>> getRequestWithHeader() {
     return clientService.getRequestWithHeader("Hola!");
