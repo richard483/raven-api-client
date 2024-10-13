@@ -223,7 +223,13 @@ public class RequestMappingMetadataBuilder {
 
   private void prepareResponseBodyClasses() {
     methods.forEach((methodName, method) -> {
-      ParameterizedType parameterizedType = (ParameterizedType) method.getGenericReturnType();
+
+      Type returnType = method.getGenericReturnType();
+      if (!(returnType instanceof ParameterizedType parameterizedType)) {
+        throw new BeanCreationException(
+            String.format("#RavenApiClient method '%s' must return ParameterizedType", methodName));
+      }
+
       if (!parameterizedType.getRawType().equals(Mono.class)) {
         throw new BeanCreationException(
             String.format("#RavenApiClient method '%s' must return reactor.core.publisher.Mono", methodName));
