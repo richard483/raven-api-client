@@ -12,13 +12,11 @@ import reactor.core.publisher.Mono;
 public interface ExampleClientWithOtherFallback {
 
   @GetMapping(value = "/getRequest-ISE",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestISE();
 
   @GetMapping(value = "/getRequest-ISE",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestISEWithThrowableParam();
 
 }

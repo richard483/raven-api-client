@@ -9,38 +9,31 @@ import reactor.core.publisher.Mono;
 @RavenApiClient(name = "getExampleClient")
 public interface GETExampleClient {
 
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestNoPath();
 
   @GetMapping(value = "/getRequest",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequest();
 
   @GetMapping(value = "/getRequest-ISE",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestISE();
 
   @GetMapping(value = "/getRequest-withHeader",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestWithHeader(@RequestHeader("X-Test-Header") String header);
 
   @GetMapping(value = "/getRequest-withHeader",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE, headers = {"X-Test-Header=Hola!"})
+      produces = MediaType.APPLICATION_JSON_VALUE, headers = {"X-Test-Header=Hola!"})
   Mono<ResponseEntity<String>> getRequestWithHeader2();
 
   @GetMapping(value = "/getRequest-withHeader",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE, headers = {"X-Test-Header"})
+      produces = MediaType.APPLICATION_JSON_VALUE, headers = {"X-Test-Header"})
   Mono<ResponseEntity<String>> getRequestWithHeader3();
 
   @GetMapping(value = "/getRequest-queryParam",
       produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE,
       params = {"name", "age"})
   Mono<ResponseEntity<String>> getRequestWithQueryParam(
       @RequestParam("name") String nameQueryParam, @RequestParam("age") String ageQueryParam);
@@ -49,8 +42,7 @@ public interface GETExampleClient {
   Mono<ResponseEntity<String>> getRequestPathVariable(@PathVariable("variable") String variable);
 
   @GetMapping(value = "/getRequest-cookieParam",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestWithCookieParam(@CookieValue("username") String username);
 
 }
