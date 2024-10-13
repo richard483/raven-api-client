@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RequestMappingMetadataBuilder {
 
-  private static final Class[] mappingAnnotation = {
+  private static final Class<?>[] mappingAnnotation = {
       GetMapping.class,
       PutMapping.class,
       PostMapping.class,
