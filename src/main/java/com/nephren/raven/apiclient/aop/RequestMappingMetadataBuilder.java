@@ -119,17 +119,17 @@ public class RequestMappingMetadataBuilder {
       if (requestMapping != null) {
         HttpHeaders httpHeaders = new HttpHeaders();
 
-        String[] consumes = requestMapping.consumes();
+        String[] consumes = requestMapping.getConsumes();
         if (consumes.length > 0) {
           httpHeaders.addAll(HttpHeaders.CONTENT_TYPE, Arrays.asList(consumes));
         }
 
-        String[] produces = requestMapping.produces();
+        String[] produces = requestMapping.getProduces();
         if (produces.length > 0) {
           httpHeaders.addAll(HttpHeaders.ACCEPT, Arrays.asList(produces));
         }
 
-        String[] requestHeaders = requestMapping.headers();
+        String[] requestHeaders = requestMapping.getHeaders();
         injectRequestHeaders(requestHeaders, httpHeaders);
 
         headers.put(methodName, httpHeaders);
@@ -241,8 +241,8 @@ public class RequestMappingMetadataBuilder {
     methods.forEach((methodName, method) -> {
       RavenRequestMapping requestMapping = getRequestMappingAnnotation(method);
 
-      if (requestMapping != null && requestMapping.method().length > 0) {
-        RequestMethod[] methods = requestMapping.method();
+      if (requestMapping != null && requestMapping.getMethod().length > 0) {
+        RequestMethod[] methods = requestMapping.getMethod();
         requestMethods.put(methodName, methods[0]);
       } else {
         requestMethods.put(methodName, RequestMethod.GET);
@@ -255,7 +255,7 @@ public class RequestMappingMetadataBuilder {
       RavenRequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
         String[] pathValues =
-            requestMapping.path().length > 0 ? requestMapping.path() : requestMapping.value();
+            requestMapping.getPath().length > 0 ? requestMapping.getPath() : requestMapping.getValue();
         if (pathValues.length > 0) {
           paths.put(methodName, pathValues[0]);
         } else {
@@ -270,7 +270,7 @@ public class RequestMappingMetadataBuilder {
     methods.forEach((methodName, method) -> {
       RavenRequestMapping requestMapping = getRequestMappingAnnotation(method);
       if (requestMapping != null) {
-        String[] consumes = requestMapping.consumes();
+        String[] consumes = requestMapping.getConsumes();
         if (consumes.length > 0) {
           contentTypes.put(methodName, consumes[0]);
         } else {
