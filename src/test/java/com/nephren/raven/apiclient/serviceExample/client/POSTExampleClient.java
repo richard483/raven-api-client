@@ -14,8 +14,7 @@ import reactor.core.publisher.Mono;
 public interface POSTExampleClient {
 
   @PostMapping(value = "/postRequest",
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<ServerResponseBody>> postRequest(@RequestBody ServerRequestBody requestBody);
 
 }

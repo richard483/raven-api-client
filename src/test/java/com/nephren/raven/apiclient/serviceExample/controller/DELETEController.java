@@ -24,4 +24,9 @@ public class DELETEController {
     return clientService.deleteRequest();
   }
 
+  @DeleteMapping("/error")
+  public Mono<ResponseEntity<String>> deleteRequestError() {
+    return clientService.deleteRequestError();
+  }
+
 }
