@@ -25,9 +25,7 @@ public class JsonBodyResolver implements ApiBodyResolver {
   @Override
   public BodyInserter<?, ? super ClientHttpRequest> resolve(Method method, Object[] arguments) {
     Parameter[] parameters = method.getParameters();
-    for (int i = 0;
-         i < parameters.length;
-         i++) {
+    for (int i = 0; i < parameters.length; i++) {
       Parameter parameter = parameters[i];
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
       if (requestBody != null) {
