@@ -3,7 +3,12 @@ package com.nephren.raven.apiclient.serviceExample.controller;
 import com.nephren.raven.apiclient.serviceExample.service.GETClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -40,6 +45,11 @@ public class GETController {
   @GetMapping("/ISE-other-fallback")
   public Mono<ResponseEntity<String>> getRequestISEWithOtherFallback() {
     return clientService.getRequestWithOtherFallback();
+  }
+
+  @GetMapping("/ISE-other-fallback-no-fallback-method")
+  public Mono<ResponseEntity<String>> getRequestISEWithOtherFallbackNoFallbackMethod() {
+    return clientService.getRequestWithOtherFallbackNoFallbackMethod();
   }
 
   @GetMapping("/ISE-other-fallback-throwable")

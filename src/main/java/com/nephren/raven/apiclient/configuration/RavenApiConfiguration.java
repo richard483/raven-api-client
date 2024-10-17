@@ -1,6 +1,5 @@
 package com.nephren.raven.apiclient.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nephren.raven.apiclient.body.FormBodyResolver;
 import com.nephren.raven.apiclient.body.JsonBodyResolver;
 import com.nephren.raven.apiclient.body.MultipartBodyResolver;
@@ -31,8 +30,8 @@ public class RavenApiConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public JsonBodyResolver jsonBodyResolver(ObjectMapper objectMapper) {
-    return new JsonBodyResolver(objectMapper);
+  public JsonBodyResolver jsonBodyResolver() {
+    return new JsonBodyResolver();
   }
 
 }

@@ -1,21 +1,16 @@
 package com.nephren.raven.apiclient.body;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import lombok.NoArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 
+@NoArgsConstructor
 public class JsonBodyResolver implements ApiBodyResolver {
-
-  private final ObjectMapper objectMapper;
-
-  public JsonBodyResolver(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
-  }
 
   @Override
   public boolean canResolve(String contentType) {

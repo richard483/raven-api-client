@@ -19,4 +19,8 @@ public interface ExampleClientWithOtherFallback {
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestISEWithThrowableParam();
 
+  @GetMapping(value = "/getRequest-ISE-no-fallback-method",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<String>> getRequestISENoFallbackMethod();
+
 }
