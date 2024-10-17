@@ -5,6 +5,7 @@ import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -20,6 +21,10 @@ public class POSTClientService {
 
   public Mono<ResponseEntity<ServerResponseBody>> postRequest(ServerRequestBody name) {
     return postExampleClient.postRequest(name);
+  }
+
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(Mono<FilePart> file) {
+    return postExampleClient.postRequestMultipart(file);
   }
 
 }
