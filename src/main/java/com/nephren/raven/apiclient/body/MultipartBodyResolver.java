@@ -6,7 +6,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -26,7 +25,7 @@ public class MultipartBodyResolver implements ApiBodyResolver {
     Parameter[] parameters = method.getParameters();
     //    MultipartBodyBuilder builder = new MultipartBodyBuilder();
     MultipartBodyBuilder builder = new MultipartBodyBuilder();
-    Mono<FilePart> filepart = Mono.just((FilePart) arguments[0]);
+    Mono<Object> filepart = (Mono<Object>) arguments[0];
     for (int i = 0;
          i < parameters.length;
          i++) {
@@ -36,7 +35,7 @@ public class MultipartBodyResolver implements ApiBodyResolver {
         String name =
             StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
         //        builder.part(name, arguments[i]);
-        builder.asyncPart(name, filepart, FilePart.class);
+        builder.asyncPart(name, filepart, Object.class);
       }
     }
     MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
