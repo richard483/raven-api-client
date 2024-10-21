@@ -4,10 +4,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -31,7 +33,11 @@ public class MultipartBodyResolver implements ApiBodyResolver {
       if (annotation != null) {
         String name =
             annotation.name().isEmpty() ? annotation.value() : annotation.name();
-        builder.part(name, arguments[i]);
+        try {
+          builder.part(name, arguments[i]);
+        } catch (Exception e) {
+          builder.asyncPart(name, (Flux<FilePart>) arguments[i], FilePart.class).filename(name);
+        }
       }
     }
     MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();

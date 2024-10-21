@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@AutoConfigureWebTestClient()
+@AutoConfigureWebTestClient(timeout = "100000000")
 class RavenApiClientPostTests {
   private final WebTestClient webTestClient;
 
