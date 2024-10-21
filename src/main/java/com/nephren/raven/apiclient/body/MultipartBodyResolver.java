@@ -1,17 +1,16 @@
 package com.nephren.raven.apiclient.body;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
-import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class MultipartBodyResolver implements ApiBodyResolver {
 
@@ -23,9 +22,7 @@ public class MultipartBodyResolver implements ApiBodyResolver {
   @Override
   public BodyInserter<?, ? super ClientHttpRequest> resolve(Method method, Object[] arguments) {
     Parameter[] parameters = method.getParameters();
-    //    MultipartBodyBuilder builder = new MultipartBodyBuilder();
     MultipartBodyBuilder builder = new MultipartBodyBuilder();
-    Mono<Object> filepart = (Mono<Object>) arguments[0];
     for (int i = 0;
          i < parameters.length;
          i++) {
@@ -33,9 +30,8 @@ public class MultipartBodyResolver implements ApiBodyResolver {
       RequestPart annotation = parameter.getAnnotation(RequestPart.class);
       if (annotation != null) {
         String name =
-            StringUtils.isEmpty(annotation.name()) ? annotation.value() : annotation.name();
-        //        builder.part(name, arguments[i]);
-        builder.asyncPart(name, filepart, Object.class);
+            annotation.name().isEmpty() ? annotation.value() : annotation.name();
+        builder.part(name, arguments[i]);
       }
     }
     MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();

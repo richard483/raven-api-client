@@ -23,7 +23,7 @@ public class POSTClientService {
     return postExampleClient.postRequest(name);
   }
 
-  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(Mono<FilePart> file) {
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(FilePart file) {
     return postExampleClient.postRequestMultipart(file);
   }
 

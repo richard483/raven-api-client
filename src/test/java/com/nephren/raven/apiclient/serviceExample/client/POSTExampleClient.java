@@ -22,6 +22,6 @@ public interface POSTExampleClient {
   @PostMapping(value = "/postRequest-multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(
-      @RequestPart("file") Mono<FilePart> file);
+      @RequestPart("file") FilePart file);
 
 }

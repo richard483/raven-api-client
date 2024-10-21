@@ -20,8 +20,9 @@ public class POSTExampleClientFallback implements POSTExampleClient {
     serverResponseBody.setMessage("Fallback during calling postRequest");
     return Mono.just(ResponseEntity.ok(serverResponseBody));
   }
+
   @Override
-  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(Mono<FilePart> file) {
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(FilePart file) {
     return null;
   }
 
