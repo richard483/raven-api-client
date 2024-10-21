@@ -10,6 +10,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RavenApiClient(name = "postExampleClient", fallback = POSTExampleClientFallback.class)
@@ -23,5 +24,11 @@ public interface POSTExampleClient {
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(
       @RequestPart("file") FilePart file);
+
+  @PostMapping(value = "/postRequest-multipart-reactive", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
+      @RequestPart("file") Flux<FilePart> file);
+
 
 }

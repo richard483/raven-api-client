@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -30,6 +31,12 @@ public class POSTController {
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(
       @RequestPart("file") FilePart file) {
     return clientService.postRequestMultipart(file);
+  }
+
+  @PostMapping(value = "multipart-reactive", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
+      @RequestPart("file") Flux<FilePart> file) {
+    return clientService.postRequestMultipartReactive(file);
   }
 
 }

@@ -57,4 +57,23 @@ class RavenApiClientPostTests {
         .expectBody(ServerResponseBody.class).isEqualTo(expected);
   }
 
+
+  @Test
+  void postRequestMultipartReactive() throws IOException {
+    Path path = Paths.get(new ClassPathResource("multipart.txt").getURI());
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    builder.part("file", new ByteArrayResource(Files.readAllBytes(path))).filename("multipart.txt");
+    ServerResponseBody expected =
+        ServerResponseBody.builder()
+            .message("Hello, World! Your file content is: Towa Sama Maji Tenshi")
+            .build();
+    webTestClient.post().uri("http://localhost:8080/post/multipart-reactive")
+        .body(BodyInserters.fromMultipartData(builder.build()))
+        .header("Content-Type", "multipart/form-data")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(ServerResponseBody.class).isEqualTo(expected);
+  }
+
 }
