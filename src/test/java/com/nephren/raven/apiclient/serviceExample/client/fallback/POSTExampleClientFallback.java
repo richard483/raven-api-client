@@ -28,7 +28,13 @@ public class POSTExampleClientFallback implements POSTExampleClient {
   }
 
   @Override
-  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(Flux<FilePart> file) {
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
+      Flux<FilePart> file) {
+    return null;
+  }
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveMono(
+      Mono<FilePart> file) {
     return null;
   }
 

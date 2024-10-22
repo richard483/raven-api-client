@@ -3,6 +3,8 @@ package com.nephren.raven.apiclient.serviceExample.server;
 import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class POSTServerController {
@@ -53,23 +56,27 @@ public class POSTServerController {
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
       @RequestPart("file") Flux<FilePart> filePart) {
 
-    return filePart.flatMap(fp -> fp.content().map(df -> {
-          byte[] bytes = new byte[df.readableByteCount()];
-          df.read(bytes);
-          return bytes;
-        })
-        .reduce((a, b) -> {
-          byte[] result = new byte[a.length + b.length];
-          System.arraycopy(a, 0, result, 0, a.length);
-          System.arraycopy(b, 0, result, a.length, b.length);
-          return result;
-        })
-        .map(bytes -> {
-          String message = new String(bytes, StandardCharsets.UTF_8);
-          return ResponseEntity.ok(ServerResponseBody.builder()
-              .message("Hello, World! Your file content is: " + message)
-              .build());
-        })).next();
+    return filePart.publishOn(Schedulers.boundedElastic()).flatMap(fp -> {
+      Path path = Paths.get("uploads/" + fp.filename());
+      log.info("#ricat Writing file to: " + path);
+      return fp.transferTo(path).then(fp.content().map(df -> {
+            byte[] bytes = new byte[df.readableByteCount()];
+            df.read(bytes);
+            return bytes;
+          })
+          .reduce((a, b) -> {
+            byte[] result = new byte[a.length + b.length];
+            System.arraycopy(a, 0, result, 0, a.length);
+            System.arraycopy(b, 0, result, a.length, b.length);
+            return result;
+          })
+          .map(bytes -> {
+            String message = new String(bytes, StandardCharsets.UTF_8);
+            return ResponseEntity.ok(ServerResponseBody.builder()
+                .message("Hello, World! Your file content is: " + message)
+                .build());
+          }));
+    }).next();
   }
 
 }

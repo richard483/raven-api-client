@@ -1,5 +1,7 @@
 package com.nephren.raven.apiclient.body;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -10,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import reactor.core.publisher.Mono;
 
 public class MultipartBodyResolver implements ApiBodyResolver {
 
@@ -33,10 +33,13 @@ public class MultipartBodyResolver implements ApiBodyResolver {
       if (annotation != null) {
         String name =
             annotation.name().isEmpty() ? annotation.value() : annotation.name();
-        try {
-          builder.part(name, arguments[i]);
-        } catch (Exception e) {
+        if (arguments[i] instanceof Flux) {
           builder.asyncPart(name, (Flux<FilePart>) arguments[i], FilePart.class).filename(name);
+        } else if (arguments[i] instanceof Mono) {
+          Mono<FilePart> filePart = (Mono<FilePart>) arguments[i];
+          builder.asyncPart(name, filePart, FilePart.class).filename(name);
+        } else {
+          builder.part(name, arguments[i]);
         }
       }
     }

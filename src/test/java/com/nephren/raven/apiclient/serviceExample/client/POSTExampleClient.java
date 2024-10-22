@@ -25,10 +25,16 @@ public interface POSTExampleClient {
   Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(
       @RequestPart("file") FilePart file);
 
-  @PostMapping(value = "/postRequest-multipart-reactive", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+  @PostMapping(value = "/postRequest-multipart-reactive",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
       @RequestPart("file") Flux<FilePart> file);
 
+  @PostMapping(value = "/postRequest-multipart-reactive", consumes =
+      MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveMono(
+      @RequestPart("file") Mono<FilePart> file);
 
 }

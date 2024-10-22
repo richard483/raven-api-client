@@ -28,8 +28,14 @@ public class POSTClientService {
     return postExampleClient.postRequestMultipart(file);
   }
 
-  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(Flux<FilePart> file) {
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
+      Flux<FilePart> file) {
     return postExampleClient.postRequestMultipartReactive(file);
+  }
+
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveMono(
+      Mono<FilePart> file) {
+    return postExampleClient.postRequestMultipartReactiveMono(file);
   }
 
 }
