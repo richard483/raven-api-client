@@ -8,6 +8,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
 
 public class FormBodyResolver implements ApiBodyResolver {
 
@@ -17,7 +18,8 @@ public class FormBodyResolver implements ApiBodyResolver {
   }
 
   @Override
-  public BodyInserter<?, ? super ClientHttpRequest> resolve(Method method, Object[] arguments) {
+  public Mono<BodyInserter<?, ? super ClientHttpRequest>> resolve(
+      Method method, Object[] arguments) {
     Parameter[] parameters = method.getParameters();
     for (int i = 0;
          i < parameters.length;
@@ -25,10 +27,10 @@ public class FormBodyResolver implements ApiBodyResolver {
       Parameter parameter = parameters[i];
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
       if (requestBody != null) {
-        return BodyInserters.fromFormData((MultiValueMap<String, String>) arguments[i]);
+        return Mono.just(BodyInserters.fromFormData((MultiValueMap<String, String>) arguments[i]));
       }
     }
-    return null;
+    return Mono.empty();
   }
 
 }

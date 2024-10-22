@@ -17,7 +17,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@AutoConfigureWebTestClient(timeout = "100000000")
+@AutoConfigureWebTestClient()
 class RavenApiClientPostTests {
   private final WebTestClient webTestClient;
 

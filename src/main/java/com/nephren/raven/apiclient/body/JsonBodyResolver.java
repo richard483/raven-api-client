@@ -8,6 +8,7 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
 
 @NoArgsConstructor
 public class JsonBodyResolver implements ApiBodyResolver {
@@ -18,16 +19,17 @@ public class JsonBodyResolver implements ApiBodyResolver {
   }
 
   @Override
-  public BodyInserter<?, ? super ClientHttpRequest> resolve(Method method, Object[] arguments) {
+  public Mono<BodyInserter<?, ? super ClientHttpRequest>> resolve(
+      Method method, Object[] arguments) {
     Parameter[] parameters = method.getParameters();
     for (int i = 0; i < parameters.length; i++) {
       Parameter parameter = parameters[i];
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
       if (requestBody != null) {
-        return BodyInserters.fromValue(arguments[i]);
+        return Mono.just(BodyInserters.fromValue(arguments[i]));
       }
     }
-    return null;
+    return Mono.empty();
   }
 
 }
