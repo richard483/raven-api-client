@@ -12,17 +12,6 @@ import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -46,6 +35,13 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class RavenApiClientMethodInterceptor implements InitializingBean, MethodInterceptor,
@@ -210,23 +206,17 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
     return spec;
   }
-  // TODO: delete test broke here
+
   private Mono doBody(
       WebClient.RequestHeadersSpec<?> client, Method method, String methodName,
       Object[] arguments) {
     if (client instanceof WebClient.RequestBodySpec bodySpec) {
-
       String contentType = metadata.getContentTypes().get(methodName);
 
       for (ApiBodyResolver bodyResolver : bodyResolvers) {
         if (bodyResolver.canResolve(contentType)) {
           return bodyResolver.resolve(method, arguments)
-              .mapNotNull(bodyInserter -> {
-                if (bodyInserter != null) {
-                  return bodySpec.body(bodyInserter);
-                }
-                return Mono.empty();
-              });
+              .map(bodySpec::body).switchIfEmpty(Mono.just(client));
         }
       }
 
