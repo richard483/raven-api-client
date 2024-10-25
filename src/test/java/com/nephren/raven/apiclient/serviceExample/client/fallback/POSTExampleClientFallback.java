@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -35,6 +36,11 @@ public class POSTExampleClientFallback implements POSTExampleClient {
   @Override
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveMono(
       Mono<FilePart> file) {
+    return null;
+  }
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
+      MultiValueMap<String, String> requestBody) {
     return null;
   }
 

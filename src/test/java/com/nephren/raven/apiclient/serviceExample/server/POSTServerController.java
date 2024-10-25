@@ -7,6 +7,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -67,6 +68,14 @@ public class POSTServerController {
               .message("Hello, World! Your file content is: " + message)
               .build());
         })).next();
+  }
+
+  @PostMapping(path = "postRequest-applicationForm", consumes =
+      MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
+      @RequestBody MultiValueMap<String, String> requestBody) {
+    String message = "Hello, my nick name is: " + requestBody.get("nick-name") + "!";
+    return Mono.just(ResponseEntity.ok(ServerResponseBody.builder().message(message).build()));
   }
 
 }

@@ -12,6 +12,8 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -86,6 +88,20 @@ class RavenApiClientPostTests {
     webTestClient.post().uri("http://localhost:8080/post/multipart-reactive-mono")
         .body(BodyInserters.fromMultipartData(builder.build()))
         .header("Content-Type", "multipart/form-data")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(ServerResponseBody.class).isEqualTo(expected);
+  }
+
+  @Test
+  void postRequestApplicationForm() {
+    //    MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+    //    //    requestBody.add("nick-name", "Richard");
+    ServerResponseBody expected = ServerResponseBody.builder().message("Hello, Richard!").build();
+    webTestClient.post().uri("http://localhost:8080/post/applicationForm")
+        .body(BodyInserters.fromFormData("nick-name", "Richard"))
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         .exchange()
         .expectStatus()
         .isOk()

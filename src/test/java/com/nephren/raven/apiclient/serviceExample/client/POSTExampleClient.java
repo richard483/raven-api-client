@@ -7,6 +7,7 @@ import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -36,5 +37,11 @@ public interface POSTExampleClient {
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveMono(
       @RequestPart("file") Mono<FilePart> file);
+
+  @PostMapping(value = "/postRequest-applicationForm",
+      consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
+      @RequestBody MultiValueMap<String, String> requestBody);
 
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,6 +37,11 @@ public class POSTClientService {
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveMono(
       Mono<FilePart> file) {
     return postExampleClient.postRequestMultipartReactiveMono(file);
+  }
+
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
+      MultiValueMap<String, String> requestBody) {
+    return postExampleClient.postRequestApplicationForm(requestBody);
   }
 
 }
