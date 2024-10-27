@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
 @RestController
@@ -59,17 +60,17 @@ public class POSTServerController {
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
       @RequestPart("file") Flux<FilePart> filePart) {
 
-    return filePart.publishOn(Schedulers.boundedElastic()).flatMap(fp -> fp.content().map(df -> {
-          byte[] bytes = new byte[df.readableByteCount()];
-          df.read(bytes);
-          return bytes;
+    return filePart.publishOn(Schedulers.boundedElastic()).flatMap(fp -> fp.content()
+        .collect(ByteArrayOutputStream::new, (stream, dataBuffer) -> {
+          byte[] bytes = new byte[dataBuffer.readableByteCount()];
+          dataBuffer.read(bytes);
+          try {
+            stream.write(bytes);
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
         })
-        .reduce((a, b) -> {
-          byte[] result = new byte[a.length + b.length];
-          System.arraycopy(a, 0, result, 0, a.length);
-          System.arraycopy(b, 0, result, a.length, b.length);
-          return result;
-        })
+        .map(ByteArrayOutputStream::toByteArray)
         .map(bytes -> {
           String message = new String(bytes, StandardCharsets.UTF_8);
           return ResponseEntity.ok(ServerResponseBody.builder()
