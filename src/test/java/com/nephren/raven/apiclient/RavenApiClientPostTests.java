@@ -62,7 +62,19 @@ class RavenApiClientPostTests {
   }
 
   @Test
-  void postRequestMultipartNoBody() throws IOException {
+  void postRequestMultipartNoArgs() {
+    ServerResponseBody expected =
+        ServerResponseBody.builder().build();
+    webTestClient.post().uri("http://localhost:8080/post/multipart-noArgs")
+        .header("Content-Type", "multipart/form-data")
+        .exchange()
+        .expectStatus()
+        .is5xxServerError()
+        .expectBody(ServerResponseBody.class).isEqualTo(expected);
+  }
+
+  @Test
+  void postRequestMultipartNoBody() {
     ServerResponseBody expected =
         ServerResponseBody.builder()
             .message("roger")

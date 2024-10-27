@@ -26,35 +26,41 @@ public class MultipartBodyResolver implements ApiBodyResolver {
       Method method, Object[] arguments) {
     Parameter[] parameters = method.getParameters();
     MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    Mono<BodyInserter<?, ? super ClientHttpRequest>> bodyInserter = Mono.empty();
     for (int i = 0; i < parameters.length; i++) {
       Parameter parameter = parameters[i];
       RequestPart annotation = parameter.getAnnotation(RequestPart.class);
 
       if (annotation != null) {
         String name = annotation.name().isEmpty() ? annotation.value() : annotation.name();
+        bodyInserter = argumentToBodyInserter(arguments[i], name, builder);
 
-        if (arguments[i] instanceof Flux) {
-          Flux<Object> filePart = (Flux<Object>) arguments[i];
-          return filePart.collectList().map(files -> {
-            for (Object file : files) {
-              builder.part(name, file);
-            }
-            MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
-            return BodyInserters.fromMultipartData(multiValueMap);
-          });
-        } else if (arguments[i] instanceof Mono) {
-          Mono<Object> filePart = (Mono<Object>) arguments[i];
-          return filePart.map(file -> {
-            builder.part(name, file);
-            MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
-            return BodyInserters.fromMultipartData(multiValueMap);
-          });
-        } else if (arguments[i] != null) {
-          builder.part(name, arguments[i]);
-          MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
-          return Mono.just(BodyInserters.fromMultipartData(multiValueMap));
-        }
       }
+    }
+    return bodyInserter;
+  }
+
+  private Mono<BodyInserter<?, ? super ClientHttpRequest>> argumentToBodyInserter(Object argument, String name, MultipartBodyBuilder builder) {
+    if (argument instanceof Flux) {
+      Flux<Object> filePart = (Flux<Object>) argument;
+      return filePart.collectList().map(files -> {
+        for (Object file : files) {
+          builder.part(name, file);
+        }
+        MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
+        return BodyInserters.fromMultipartData(multiValueMap);
+      });
+    } else if (argument instanceof Mono) {
+      Mono<Object> filePart = (Mono<Object>) argument;
+      return filePart.map(file -> {
+        builder.part(name, file);
+        MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
+        return BodyInserters.fromMultipartData(multiValueMap);
+      });
+    } else if (argument != null) {
+      builder.part(name, argument);
+      MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
+      return Mono.just(BodyInserters.fromMultipartData(multiValueMap));
     }
     return Mono.empty();
   }
