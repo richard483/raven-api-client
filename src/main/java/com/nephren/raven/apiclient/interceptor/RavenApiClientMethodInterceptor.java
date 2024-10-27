@@ -237,6 +237,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     Type type = metadata.getResponseBodyClasses().get(methodName);
     if (type instanceof ParameterizedType parameterizedType) {
       if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
+        // TODO: need to update error handling
         Mono<WebClient.ResponseSpec> responseEntitySpec =
             client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
                 clientResponse -> Mono.empty()));
