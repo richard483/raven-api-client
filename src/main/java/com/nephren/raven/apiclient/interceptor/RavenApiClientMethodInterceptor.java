@@ -235,34 +235,48 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   private Mono doResponse(Mono<WebClient.RequestHeadersSpec<?>> client, String methodName) {
     Type type = metadata.getResponseBodyClasses().get(methodName);
+    return handleResponseType(client, type);
+  }
+
+  private Mono handleResponseType(Mono<WebClient.RequestHeadersSpec<?>> client, Type type) {
     if (type instanceof ParameterizedType parameterizedType) {
-      if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
-        // TODO: need to update error handling
-        Mono<WebClient.ResponseSpec> responseEntitySpec =
-            client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
-                clientResponse -> Mono.empty()));
-
-        if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument) {
-          if (List.class.equals(actualTypeArgument.getRawType())) {
-            return responseEntitySpec.flatMap(respEntity -> respEntity.toEntityList(
-                ParameterizedTypeReference.forType(
-                    actualTypeArgument.getActualTypeArguments()[0])));
-          }
-        }
-
-        Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
-        if (Void.class.equals(actualTypeArgument)) {
-          return responseEntitySpec.flatMap(WebClient.ResponseSpec::toBodilessEntity);
-        } else {
-          return responseEntitySpec.flatMap(respEntity -> respEntity.toEntity(
-              ParameterizedTypeReference.forType(actualTypeArgument)));
-        }
-      } else {
-        return client.flatMap(
-            c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType)));
-      }
+      return handleParameterizedType(client, parameterizedType);
     } else {
       return client.flatMap(c -> c.retrieve().bodyToMono((Class) type));
+    }
+  }
+
+  private Mono handleParameterizedType(Mono<WebClient.RequestHeadersSpec<?>> client,
+                                       ParameterizedType parameterizedType) {
+    if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
+      return handleResponseEntity(client, parameterizedType);
+    } else {
+      return client.flatMap(
+          c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType)));
+    }
+  }
+
+  private Mono handleResponseEntity(Mono<WebClient.RequestHeadersSpec<?>> client,
+                                    ParameterizedType parameterizedType) {
+    // TODO: need to update error handling
+    Mono<WebClient.ResponseSpec> responseEntitySpec =
+        client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
+            clientResponse -> Mono.empty()));
+
+    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument) {
+      if (List.class.equals(actualTypeArgument.getRawType())) {
+        return responseEntitySpec.flatMap(respEntity -> respEntity.toEntityList(
+            ParameterizedTypeReference.forType(
+                actualTypeArgument.getActualTypeArguments()[0])));
+      }
+    }
+
+    Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
+    if (Void.class.equals(actualTypeArgument)) {
+      return responseEntitySpec.flatMap(WebClient.ResponseSpec::toBodilessEntity);
+    } else {
+      return responseEntitySpec.flatMap(respEntity -> respEntity.toEntity(
+          ParameterizedTypeReference.forType(actualTypeArgument)));
     }
   }
 
