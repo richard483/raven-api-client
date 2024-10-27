@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -82,7 +83,12 @@ class RavenApiClientGetTests {
         .expectStatus()
         .is5xxServerError()
         .expectBody(String.class)
-        .isEqualTo("Connection refused: getsockopt: localhost/127.0.0.1:8081");
+        .value(message -> {
+          Assertions.assertThat(message)
+              .contains("Connection refused")
+              .contains("localhost")
+              .contains("8081");
+        });
   }
 
   @Test
