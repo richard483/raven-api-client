@@ -3,6 +3,7 @@ package com.nephren.raven.apiclient.serviceExample.server;
 import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
@@ -35,6 +36,7 @@ public class POSTServerController {
         .map(dataBuffer -> {
           byte[] bytes = new byte[dataBuffer.readableByteCount()];
           dataBuffer.read(bytes);
+          DataBufferUtils.release(dataBuffer);
           return bytes;
         })
         .flatMap(bytes -> {
