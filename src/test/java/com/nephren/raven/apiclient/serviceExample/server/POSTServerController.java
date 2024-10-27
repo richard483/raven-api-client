@@ -2,19 +2,20 @@ package com.nephren.raven.apiclient.serviceExample.server;
 
 import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
-import java.nio.charset.StandardCharsets;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.nio.charset.StandardCharsets;
 
 @RestController
 public class POSTServerController {
@@ -72,10 +73,11 @@ public class POSTServerController {
 
   @PostMapping(path = "postRequest-applicationForm", consumes =
       MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
-      @RequestBody MultiValueMap<String, String> requestBody) {
-    String message = "Hello, my nick name is: " + requestBody.get("nick-name") + "!";
-    return Mono.just(ResponseEntity.ok(ServerResponseBody.builder().message(message).build()));
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(ServerWebExchange serverWebExchange) {
+    return serverWebExchange.getFormData().map(formData -> {
+      String message = "Hello, " + formData.getFirst("nick-name") + "!";
+      return ResponseEntity.ok(ServerResponseBody.builder().message(message).build());
+    });
   }
 
 }

@@ -7,12 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -50,10 +46,9 @@ public class POSTController {
     return clientService.postRequestMultipartReactiveMono(file);
   }
 
-  @PostMapping(value = "applicationForm", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
-      @RequestBody MultiValueMap<String, String> body) {
-    return clientService.postRequestApplicationForm(body);
+  @PostMapping(value = "applicationForm", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(ServerWebExchange serverWebExchange) {
+    return serverWebExchange.getFormData().flatMap(clientService::postRequestApplicationForm);
   }
 
 }
