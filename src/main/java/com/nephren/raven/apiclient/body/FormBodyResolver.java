@@ -25,7 +25,7 @@ public class FormBodyResolver implements ApiBodyResolver {
     for (int i = 0; i < parameters.length; i++) {
       Parameter parameter = parameters[i];
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
-      if (requestBody != null) {
+      if (requestBody != null && arguments[i] != null) {
         return Mono.just(BodyInserters.fromFormData((MultiValueMap<String, String>) arguments[i]));
       }
     }

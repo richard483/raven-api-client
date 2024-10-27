@@ -1,7 +1,5 @@
 package com.nephren.raven.apiclient.body;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import lombok.NoArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -9,6 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 @NoArgsConstructor
 public class JsonBodyResolver implements ApiBodyResolver {
@@ -25,7 +26,7 @@ public class JsonBodyResolver implements ApiBodyResolver {
     for (int i = 0; i < parameters.length; i++) {
       Parameter parameter = parameters[i];
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
-      if (requestBody != null) {
+      if (requestBody != null && arguments[i] != null) {
         return Mono.just(BodyInserters.fromValue(arguments[i]));
       }
     }

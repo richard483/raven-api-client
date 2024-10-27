@@ -1,7 +1,5 @@
 package com.nephren.raven.apiclient.body;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -12,6 +10,9 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class MultipartBodyResolver implements ApiBodyResolver {
 
@@ -48,7 +49,7 @@ public class MultipartBodyResolver implements ApiBodyResolver {
             MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
             return BodyInserters.fromMultipartData(multiValueMap);
           });
-        } else {
+        } else if (arguments[i] != null) {
           builder.part(name, arguments[i]);
           MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
           return Mono.just(BodyInserters.fromMultipartData(multiValueMap));
