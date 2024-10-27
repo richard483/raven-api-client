@@ -20,8 +20,8 @@ public class DELETEClientService {
     this.deleteExampleClientError = deleteExampleClientError;
   }
 
-  public Mono<ResponseEntity<String>> deleteRequest() {
-    return deleteExampleClient.deleteRequest();
+  public Mono<ResponseEntity<String>> deleteRequest(String name) {
+    return deleteExampleClient.deleteRequest(name);
   }
 
   public Mono<ResponseEntity<String>> deleteRequestError() {

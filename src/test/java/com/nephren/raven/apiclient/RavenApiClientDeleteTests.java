@@ -18,11 +18,11 @@ class RavenApiClientDeleteTests {
 
   @Test
   void deleteRequest() {
-    webTestClient.delete().uri("http://localhost:8080/delete")
+    webTestClient.delete().uri("http://localhost:8080/delete/Towa")
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class).isEqualTo("Hello, World!");
+        .expectBody(String.class).isEqualTo("Hello, Towa!");
   }
 
   @Test
