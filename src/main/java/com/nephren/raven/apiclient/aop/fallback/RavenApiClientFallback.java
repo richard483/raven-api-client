@@ -1,9 +1,10 @@
 package com.nephren.raven.apiclient.aop.fallback;
 
-import java.lang.reflect.Method;
 import lombok.Builder;
 import org.springframework.util.ReflectionUtils;
 import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
 
 @Builder
 public class RavenApiClientFallback {
@@ -21,13 +22,13 @@ public class RavenApiClientFallback {
             return (Mono) ReflectionUtils.invokeMethod(method, fallback, arguments);
           }
 
-          Method methodWithException = fallbackMetadata.getExceptionMethods().get(method);
+          Method methodWithException = fallbackMetadata.exceptionMethods().get(method);
           if (methodWithException != null) {
             Object[] target = getArgumentsWithException(arguments, exception);
             return (Mono) ReflectionUtils.invokeMethod(methodWithException, fallback, target);
           }
 
-          Method fallbackMethod = fallbackMetadata.getMethods().get(method);
+          Method fallbackMethod = fallbackMetadata.methods().get(method);
           if (fallbackMethod != null) {
             return (Mono) ReflectionUtils.invokeMethod(fallbackMethod, fallback, arguments);
           }
