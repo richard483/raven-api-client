@@ -47,6 +47,11 @@ public class POSTServerController {
         });
   }
 
+  @PostMapping(path = "/postRequest-multipart-noBody", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBody() {
+    return Mono.just(ResponseEntity.ok(ServerResponseBody.builder().message("roger").build()));
+  }
+
   @PostMapping(path = "/postRequest-multipart-reactive",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
@@ -78,6 +83,12 @@ public class POSTServerController {
       String message = "Hello, " + formData.getFirst("nick-name") + "!";
       return ResponseEntity.ok(ServerResponseBody.builder().message(message).build());
     });
+  }
+
+  @PostMapping(path = "postRequest-applicationForm-noBody", consumes =
+      MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationFormNoBody() {
+    return Mono.just(ResponseEntity.ok(ServerResponseBody.builder().message("roger").build()));
   }
 
 }

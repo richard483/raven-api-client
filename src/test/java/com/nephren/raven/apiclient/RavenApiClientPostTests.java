@@ -62,6 +62,20 @@ class RavenApiClientPostTests {
   }
 
   @Test
+  void postRequestMultipartNoBody() throws IOException {
+    ServerResponseBody expected =
+        ServerResponseBody.builder()
+            .message("roger")
+            .build();
+    webTestClient.post().uri("http://localhost:8080/post/multipart-noBody")
+        .header("Content-Type", "multipart/form-data")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(ServerResponseBody.class).isEqualTo(expected);
+  }
+
+  @Test
   void postRequestMultipartReactive() throws IOException {
     Path path = Paths.get(new ClassPathResource("multipart.txt").getURI());
     MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -104,6 +118,17 @@ class RavenApiClientPostTests {
     ServerResponseBody expected = ServerResponseBody.builder().message("Hello, Richard!").build();
     webTestClient.post().uri("http://localhost:8080/post/applicationForm")
         .body(BodyInserters.fromFormData(requestBody))
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(ServerResponseBody.class).isEqualTo(expected);
+  }
+
+  @Test
+  void postRequestApplicationFormNoBody() {
+    ServerResponseBody expected = ServerResponseBody.builder().message("roger").build();
+    webTestClient.post().uri("http://localhost:8080/post/applicationForm-noBody")
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         .exchange()
         .expectStatus()

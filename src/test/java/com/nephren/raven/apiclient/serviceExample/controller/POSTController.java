@@ -34,10 +34,15 @@ public class POSTController {
     return clientService.postRequestMultipart(file);
   }
 
+  @PostMapping(value = "multipart-noBody", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBody() {
+    return clientService.postRequestMultipartNoBody();
+  }
+
   @PostMapping(value = "multipart-reactive", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
       @RequestPart("file") Flux<FilePart> file) {
-    return clientService.postRequestMultipartReactive(file);
+    return clientService.postRequestMultipartReactiveFlux(file);
   }
 
   @PostMapping(value = "multipart-reactive-mono", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -49,6 +54,11 @@ public class POSTController {
   @PostMapping(value = "applicationForm", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
   public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(ServerWebExchange serverWebExchange) {
     return serverWebExchange.getFormData().flatMap(clientService::postRequestApplicationForm);
+  }
+
+  @PostMapping(value = "applicationForm-noBody", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationFormNoBody() {
+    return clientService.postRequestApplicationFormNoBody();
   }
 
 }
