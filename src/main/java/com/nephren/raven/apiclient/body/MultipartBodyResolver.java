@@ -1,10 +1,8 @@
 package com.nephren.raven.apiclient.body;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -47,20 +45,17 @@ public class MultipartBodyResolver implements ApiBodyResolver {
         for (Object file : files) {
           builder.part(name, file);
         }
-        MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
-        return BodyInserters.fromMultipartData(multiValueMap);
+        return BodyInserters.fromMultipartData(builder.build());
       });
     } else if (argument instanceof Mono) {
       Mono<Object> filePart = (Mono<Object>) argument;
       return filePart.map(file -> {
         builder.part(name, file);
-        MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
-        return BodyInserters.fromMultipartData(multiValueMap);
+        return BodyInserters.fromMultipartData(builder.build());
       });
     } else if (argument != null) {
       builder.part(name, argument);
-      MultiValueMap<String, HttpEntity<?>> multiValueMap = builder.build();
-      return Mono.just(BodyInserters.fromMultipartData(multiValueMap));
+      return Mono.just(BodyInserters.fromMultipartData(builder.build()));
     }
     return Mono.empty();
   }
