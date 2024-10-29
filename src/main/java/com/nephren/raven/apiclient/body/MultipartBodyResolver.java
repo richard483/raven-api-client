@@ -1,5 +1,7 @@
 package com.nephren.raven.apiclient.body;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -8,9 +10,7 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import reactor.util.function.Tuple2;
 
 public class MultipartBodyResolver implements ApiBodyResolver {
 
@@ -18,46 +18,64 @@ public class MultipartBodyResolver implements ApiBodyResolver {
   public boolean canResolve(String contentType) {
     return MediaType.MULTIPART_FORM_DATA_VALUE.equals(contentType);
   }
-
   @Override
   public Mono<BodyInserter<?, ? super ClientHttpRequest>> resolve(
       Method method, Object[] arguments) {
     Parameter[] parameters = method.getParameters();
-    MultipartBodyBuilder builder = new MultipartBodyBuilder();
-    Mono<BodyInserter<?, ? super ClientHttpRequest>> bodyInserter = Mono.empty();
-    for (int i = 0; i < parameters.length; i++) {
-      Parameter parameter = parameters[i];
-      RequestPart annotation = parameter.getAnnotation(RequestPart.class);
+    Mono<MultipartBodyBuilder> builder = Mono.just(new MultipartBodyBuilder());
 
-      if (annotation != null) {
-        String name = annotation.name().isEmpty() ? annotation.value() : annotation.name();
-        bodyInserter = argumentToBodyInserter(arguments[i], name, builder);
-
-      }
-    }
-    return bodyInserter;
+    return Flux.fromArray(parameters)
+        .index()
+        .flatMap(indexAndParameter -> collectNameObjectPair(indexAndParameter, arguments))
+        .reduce(builder, (b, nameObjectPair) -> handleMultipart(nameObjectPair, b))
+        .flatMap(b -> b.map(buildr -> BodyInserters.fromMultipartData(buildr.build())));
   }
 
-  private Mono<BodyInserter<?, ? super ClientHttpRequest>> argumentToBodyInserter(Object argument, String name, MultipartBodyBuilder builder) {
-    if (argument instanceof Flux) {
-      Flux<Object> filePart = (Flux<Object>) argument;
-      return filePart.collectList().map(files -> {
-        for (Object file : files) {
-          builder.part(name, file);
-        }
-        return BodyInserters.fromMultipartData(builder.build());
-      });
-    } else if (argument instanceof Mono) {
-      Mono<Object> filePart = (Mono<Object>) argument;
-      return filePart.map(file -> {
-        builder.part(name, file);
-        return BodyInserters.fromMultipartData(builder.build());
-      });
-    } else if (argument != null) {
-      builder.part(name, argument);
-      return Mono.just(BodyInserters.fromMultipartData(builder.build()));
+  private Mono<NameObjectPair> collectNameObjectPair(
+      Tuple2<Long, Parameter> indexAndParameter,
+      Object[] arguments) {
+    int index = indexAndParameter.getT1().intValue();
+    Parameter parameter = indexAndParameter.getT2();
+    RequestPart annotation = parameter.getAnnotation(RequestPart.class);
+
+    if (annotation != null) {
+      String name = annotation.name().isEmpty() ? annotation.value() : annotation.name();
+      return Mono.just(new NameObjectPair(name, arguments[index]));
     }
-    return Mono.empty();
+    //TODO: check if we could return mono empty here
+    return Mono.just(new NameObjectPair(null, null));
+  }
+
+  private Mono<MultipartBodyBuilder> handleMultipart(
+      NameObjectPair nameObjectPair, Mono<MultipartBodyBuilder> builder) {
+    if (nameObjectPair.name() == null || nameObjectPair.object() == null) {
+      return builder;
+    }
+
+    if (nameObjectPair.object() instanceof Flux) {
+      Flux<Object> filePart = (Flux<Object>) nameObjectPair.object();
+      return filePart.collectList().flatMap(files -> builder.map(b -> {
+        for (Object file : files) {
+          b.part(nameObjectPair.name(), file);
+        }
+        return b;
+      }));
+    } else if (nameObjectPair.object() instanceof Mono) {
+      Mono<Object> filePart = (Mono<Object>) nameObjectPair.object();
+      return filePart.flatMap(file -> builder.map(buildr -> {
+        buildr.part(nameObjectPair.name(), file);
+        return buildr;
+      }));
+    } else {
+      return builder.map(b -> {
+        b.part(nameObjectPair.name(), nameObjectPair.object());
+        return b;
+      });
+    }
+
+  }
+
+  private record NameObjectPair(String name, Object object) {
   }
 
 }

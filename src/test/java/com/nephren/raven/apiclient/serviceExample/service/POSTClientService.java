@@ -33,6 +33,11 @@ public class POSTClientService {
     return postExampleClient.postRequestMultipartNoBody();
   }
 
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBodyPathVariable(
+      String name) {
+    return postExampleClient.postRequestMultipartNoBodyPathVariable(name);
+  }
+
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveFlux(
       Flux<FilePart> file) {
     return postExampleClient.postRequestMultipartReactiveFlux(file);

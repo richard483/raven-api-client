@@ -32,6 +32,11 @@ public class POSTExampleClientFallback implements POSTExampleClient {
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBody() {
     return null;
   }
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBodyPathVariable(
+      String name) {
+    return null;
+  }
 
   @Override
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveFlux(

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,13 @@ public class POSTController {
     return clientService.postRequestMultipartNoBody();
   }
 
+  @PostMapping(value = "multipart-noBody-pathVariable/{name}", consumes =
+      MediaType.MULTIPART_FORM_DATA_VALUE)
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBodyPathVariable(
+      @PathVariable String name) {
+    return clientService.postRequestMultipartNoBodyPathVariable(name);
+  }
+
   @PostMapping(value = "multipart-reactive", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactive(
       @RequestPart("file") Flux<FilePart> file) {
@@ -61,11 +69,13 @@ public class POSTController {
   }
 
   @PostMapping(value = "applicationForm", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(ServerWebExchange serverWebExchange) {
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
+      ServerWebExchange serverWebExchange) {
     return serverWebExchange.getFormData().flatMap(clientService::postRequestApplicationForm);
   }
 
-  @PostMapping(value = "applicationForm-noBody", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+  @PostMapping(value = "applicationForm-noBody",
+      consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
   public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationFormNoBody() {
     return clientService.postRequestApplicationFormNoBody();
   }
