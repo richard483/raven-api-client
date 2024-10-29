@@ -259,26 +259,29 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     }
   }
 
-  private Mono handleResponseEntity(Mono<WebClient.RequestHeadersSpec<?>> client,
-                                    ParameterizedType parameterizedType) {
-    // TODO: need to update error handling
-    Mono<WebClient.ResponseSpec> responseEntitySpec =
-        client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
-            clientResponse -> Mono.empty()));
+  private Mono handleResponseEntity(Mono<WebClient.RequestHeadersSpec<?>> client, ParameterizedType parameterizedType) {
+    return handleResponseSpec(getResponseEntitySpec(client), parameterizedType);
+  }
 
-    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument) {
-      if (List.class.equals(actualTypeArgument.getRawType())) {
-        return responseEntitySpec.flatMap(respEntity -> respEntity.toEntityList(
-            ParameterizedTypeReference.forType(
-                actualTypeArgument.getActualTypeArguments()[0])));
-      }
+  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(Mono<WebClient.RequestHeadersSpec<?>> client) {
+    // TODO: need to update error handling
+    return client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
+        clientResponse -> Mono.empty()));
+  }
+
+  private Mono handleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
+    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument
+        && List.class.equals(actualTypeArgument.getRawType())) {
+      return responseSpec.flatMap(respEntity -> respEntity.toEntityList(
+          ParameterizedTypeReference.forType(
+              actualTypeArgument.getActualTypeArguments()[0])));
     }
 
     Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
     if (Void.class.equals(actualTypeArgument)) {
-      return responseEntitySpec.flatMap(WebClient.ResponseSpec::toBodilessEntity);
+      return responseSpec.flatMap(WebClient.ResponseSpec::toBodilessEntity);
     } else {
-      return responseEntitySpec.flatMap(respEntity -> respEntity.toEntity(
+      return responseSpec.flatMap(respEntity -> respEntity.toEntity(
           ParameterizedTypeReference.forType(actualTypeArgument)));
     }
   }
