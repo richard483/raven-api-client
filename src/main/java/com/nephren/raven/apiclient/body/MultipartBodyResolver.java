@@ -1,7 +1,5 @@
 package com.nephren.raven.apiclient.body;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -12,12 +10,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 public class MultipartBodyResolver implements ApiBodyResolver {
 
   @Override
   public boolean canResolve(String contentType) {
     return MediaType.MULTIPART_FORM_DATA_VALUE.equals(contentType);
   }
+
   @Override
   public Mono<BodyInserter<?, ? super ClientHttpRequest>> resolve(
       Method method, Object[] arguments) {
@@ -42,16 +44,11 @@ public class MultipartBodyResolver implements ApiBodyResolver {
       String name = annotation.name().isEmpty() ? annotation.value() : annotation.name();
       return Mono.just(new NameObjectPair(name, arguments[index]));
     }
-    //TODO: check if we could return mono empty here
-    return Mono.just(new NameObjectPair(null, null));
+    return Mono.empty();
   }
 
   private Mono<MultipartBodyBuilder> handleMultipart(
       NameObjectPair nameObjectPair, Mono<MultipartBodyBuilder> builder) {
-    if (nameObjectPair.name() == null || nameObjectPair.object() == null) {
-      return builder;
-    }
-
     if (nameObjectPair.object() instanceof Flux) {
       Flux<Object> filePart = (Flux<Object>) nameObjectPair.object();
       return filePart.collectList().flatMap(files -> builder.map(b -> {
