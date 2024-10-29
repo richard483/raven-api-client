@@ -270,20 +270,24 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private Mono handleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
-    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument
-        && List.class.equals(actualTypeArgument.getRawType())) {
-      return responseSpec.flatMap(respEntity -> respEntity.toEntityList(
-          ParameterizedTypeReference.forType(
-              actualTypeArgument.getActualTypeArguments()[0])));
+    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument && List.class.equals(actualTypeArgument.getRawType())) {
+      return handleListResponseSpec(responseSpec, actualTypeArgument);
     }
 
     Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
-    if (Void.class.equals(actualTypeArgument)) {
-      return responseSpec.flatMap(WebClient.ResponseSpec::toBodilessEntity);
-    } else {
-      return responseSpec.flatMap(respEntity -> respEntity.toEntity(
-          ParameterizedTypeReference.forType(actualTypeArgument)));
-    }
+    return Void.class.equals(actualTypeArgument) ? responseSpec.flatMap(WebClient.ResponseSpec::toBodilessEntity)
+        : handleSingleResponseSpec(responseSpec, actualTypeArgument);
+  }
+
+  private Mono handleListResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
+    return responseSpec.flatMap(respEntity -> respEntity.toEntityList(
+        ParameterizedTypeReference.forType(
+            parameterizedType.getActualTypeArguments()[0])));
+  }
+
+  private Mono handleSingleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, Type type) {
+    return responseSpec.flatMap(respEntity -> respEntity.toEntity(
+        ParameterizedTypeReference.forType(type)));
   }
 
   private Mono doFallback(Throwable throwable, Method method, Object[] arguments) {
