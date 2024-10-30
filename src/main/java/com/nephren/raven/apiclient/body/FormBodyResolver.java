@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient.body;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.MultiValueMap;
@@ -11,6 +12,7 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+@Slf4j
 public class FormBodyResolver implements ApiBodyResolver {
 
   @Override
@@ -26,6 +28,7 @@ public class FormBodyResolver implements ApiBodyResolver {
       Parameter parameter = parameters[i];
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
       if (requestBody != null && arguments[i] != null) {
+        log.debug("#FormBodyResolver - adding form body with value {}", arguments[i]);
         return Mono.just(BodyInserters.fromFormData((MultiValueMap<String, String>) arguments[i]));
       }
     }

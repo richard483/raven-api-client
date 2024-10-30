@@ -1,6 +1,6 @@
 package com.nephren.raven.apiclient.body;
 
-import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-@NoArgsConstructor
+@Slf4j
 public class JsonBodyResolver implements ApiBodyResolver {
 
   @Override
@@ -27,6 +27,7 @@ public class JsonBodyResolver implements ApiBodyResolver {
       Parameter parameter = parameters[i];
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
       if (requestBody != null && arguments[i] != null) {
+        log.debug("#JsonBodyResolver - adding json body with value {}", arguments[i]);
         return Mono.just(BodyInserters.fromValue(arguments[i]));
       }
     }

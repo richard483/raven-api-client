@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient.body;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -13,6 +14,7 @@ import reactor.util.function.Tuple2;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+@Slf4j
 public class MultipartBodyResolver implements ApiBodyResolver {
 
   @Override
@@ -49,22 +51,23 @@ public class MultipartBodyResolver implements ApiBodyResolver {
 
   private Mono<MultipartBodyBuilder> handleMultipart(
       NameObjectPair nameObjectPair, Mono<MultipartBodyBuilder> builder) {
-    if (nameObjectPair.object() instanceof Flux) {
-      Flux<Object> filePart = (Flux<Object>) nameObjectPair.object();
+    if (nameObjectPair.object() instanceof Flux<?> filePart) {
       return filePart.collectList().flatMap(files -> builder.map(b -> {
         for (Object file : files) {
+          log.debug("#MultipartBodyResolcer - adding flux part with name {} and file {}", nameObjectPair.name(), file);
           b.part(nameObjectPair.name(), file);
         }
         return b;
       }));
-    } else if (nameObjectPair.object() instanceof Mono) {
-      Mono<Object> filePart = (Mono<Object>) nameObjectPair.object();
+    } else if (nameObjectPair.object() instanceof Mono<?> filePart) {
       return filePart.flatMap(file -> builder.map(buildr -> {
+        log.debug("#MultipartBodyResolcer - adding mono part with name {} and file {}", nameObjectPair.name(), file);
         buildr.part(nameObjectPair.name(), file);
         return buildr;
       }));
     } else {
       return builder.map(b -> {
+        log.debug("#MultipartBodyResolcer - adding part with name {} and object {}", nameObjectPair.name(), nameObjectPair.object());
         b.part(nameObjectPair.name(), nameObjectPair.object());
         return b;
       });
