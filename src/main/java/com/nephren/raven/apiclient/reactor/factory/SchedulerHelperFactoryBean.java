@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import lombok.AllArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.FactoryBean;
 import reactor.core.scheduler.Scheduler;
@@ -120,10 +119,7 @@ public class SchedulerHelperFactoryBean implements FactoryBean<SchedulerHelper> 
         properties.getDaemon());
   }
 
-  @AllArgsConstructor
-  private static class SchedulerHelperImpl implements SchedulerHelper {
-
-    private final Map<String, Scheduler> schedulers;
+  private record SchedulerHelperImpl(Map<String, Scheduler> schedulers) implements SchedulerHelper {
 
     @Override
     public Scheduler of(String name) {

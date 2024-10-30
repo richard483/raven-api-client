@@ -18,9 +18,10 @@ public class GETClientService {
   private final ExampleClientWithOtherFallback exampleClientWithOtherFallback;
 
   @Autowired
-  public GETClientService(GETExampleClient getExampleClient,
-                          ExampleClientWithFallback exampleClientWithFallback,
-                          ExampleClientWithOtherFallback exampleClientWithOtherFallback) {
+  public GETClientService(
+      GETExampleClient getExampleClient,
+      ExampleClientWithFallback exampleClientWithFallback,
+      ExampleClientWithOtherFallback exampleClientWithOtherFallback) {
     this.getExampleClient = getExampleClient;
     this.exampleClientWithFallback = exampleClientWithFallback;
     this.exampleClientWithOtherFallback = exampleClientWithOtherFallback;
@@ -44,6 +45,10 @@ public class GETClientService {
 
   public Mono<ResponseEntity<String>> getRequestWithOtherFallback() {
     return exampleClientWithOtherFallback.getRequestISE();
+  }
+
+  public Mono<ResponseEntity<String>> getRequestWithOtherFallbackNoFallbackMethod() {
+    return exampleClientWithOtherFallback.getRequestISENoFallbackMethod();
   }
 
   public Mono<ResponseEntity<String>> getRequestISEWithThrowableParam() {

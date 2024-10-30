@@ -12,6 +12,30 @@ import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriBuilder;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -23,31 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import lombok.Setter;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.reactive.function.BodyInserter;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-import reactor.netty.http.client.HttpClient;
 
+@Slf4j
 public class RavenApiClientMethodInterceptor implements InitializingBean, MethodInterceptor,
     ApplicationContextAware {
 
@@ -211,55 +212,82 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return spec;
   }
 
-  private WebClient.RequestHeadersSpec<?> doBody(
+  private Mono doBody(
       WebClient.RequestHeadersSpec<?> client, Method method, String methodName,
       Object[] arguments) {
     if (client instanceof WebClient.RequestBodySpec bodySpec) {
-
       String contentType = metadata.getContentTypes().get(methodName);
-      BodyInserter<?, ? super ClientHttpRequest> body = null;
 
       for (ApiBodyResolver bodyResolver : bodyResolvers) {
         if (bodyResolver.canResolve(contentType)) {
-          body = bodyResolver.resolve(method, arguments);
+          return bodyResolver.resolve(method, arguments)
+              .map(bodySpec::body).switchIfEmpty(Mono.defer(() -> {
+                log.warn("#RavenApiClientMethodInterceptor - doBody: body resolver can't resolve with method: {} " +
+                        "and content type: {}",
+                    methodName,
+                    contentType);
+                return Mono.just(client);
+              }));
         }
       }
 
-      if (body != null) {
-        return bodySpec.body(body);
-      }
     }
-    return client;
+    log.warn("#RavenApiClientMethodInterceptor - doBody: No body resolver found for method: {}", methodName);
+    return Mono.just(client);
   }
 
-  private Mono doResponse(WebClient.RequestHeadersSpec<?> client, String methodName) {
+  private Mono doResponse(Mono<WebClient.RequestHeadersSpec<?>> client, String methodName) {
     Type type = metadata.getResponseBodyClasses().get(methodName);
+    return handleResponseType(client, type);
+  }
+
+  private Mono handleResponseType(Mono<WebClient.RequestHeadersSpec<?>> client, Type type) {
     if (type instanceof ParameterizedType parameterizedType) {
-      if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
-        WebClient.ResponseSpec responseEntitySpec =
-            client.retrieve().onStatus(HttpStatusCode::isError,
-                clientResponse -> Mono.empty());
-
-        if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument) {
-          if (List.class.equals(actualTypeArgument.getRawType())) {
-            return responseEntitySpec.toEntityList(
-                ParameterizedTypeReference.forType(actualTypeArgument.getActualTypeArguments()[0]));
-          }
-        }
-
-        Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
-        if (Void.class.equals(actualTypeArgument)) {
-          return responseEntitySpec.toBodilessEntity();
-        } else {
-          return responseEntitySpec.toEntity(
-              ParameterizedTypeReference.forType(actualTypeArgument));
-        }
-      } else {
-        return client.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType));
-      }
+      return handleParameterizedType(client, parameterizedType);
     } else {
-      return client.retrieve().bodyToMono((Class) type);
+      return client.flatMap(c -> c.retrieve().bodyToMono((Class) type));
     }
+  }
+
+  private Mono handleParameterizedType(Mono<WebClient.RequestHeadersSpec<?>> client,
+                                       ParameterizedType parameterizedType) {
+    if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
+      return handleResponseEntity(client, parameterizedType);
+    } else {
+      return client.flatMap(
+          c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType)));
+    }
+  }
+
+  private Mono handleResponseEntity(Mono<WebClient.RequestHeadersSpec<?>> client, ParameterizedType parameterizedType) {
+    return handleResponseSpec(getResponseEntitySpec(client), parameterizedType);
+  }
+
+  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(Mono<WebClient.RequestHeadersSpec<?>> client) {
+    // TODO: need to update error handling
+    return client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
+        clientResponse -> Mono.empty()));
+  }
+
+  private Mono handleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
+    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument && List.class.equals(actualTypeArgument.getRawType())) {
+      return handleListResponseSpec(responseSpec, actualTypeArgument);
+    }
+
+    Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
+    return Void.class.equals(actualTypeArgument) ? responseSpec.flatMap(WebClient.ResponseSpec::toBodilessEntity)
+        : handleSingleResponseSpec(responseSpec, actualTypeArgument);
+  }
+
+  private Mono handleListResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
+    return responseSpec.flatMap(respEntity -> respEntity.toEntityList(
+        ParameterizedTypeReference.forType(
+            parameterizedType.getActualTypeArguments()[0])));
+  }
+
+  private Mono handleSingleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, Type type) {
+    return responseSpec.flatMap(respEntity -> respEntity.toEntity(
+        ParameterizedTypeReference.forType(type)));
   }
 
   private Mono doFallback(Throwable throwable, Method method, Object[] arguments) {

@@ -18,11 +18,25 @@ class RavenApiClientDeleteTests {
 
   @Test
   void deleteRequest() {
-    webTestClient.delete().uri("http://localhost:8080/delete")
+    webTestClient.delete().uri("http://localhost:8080/delete/Towa")
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class).isEqualTo("Hello, World!");
+        .expectBody(String.class).isEqualTo("Hello, Towa!");
+  }
+
+  @Test
+  void deleteRequestError() {
+    webTestClient.delete().uri("http://localhost:8080/delete/error")
+        .exchange()
+        .expectStatus()
+        .is5xxServerError()
+        .expectBody()
+        .jsonPath("$.timestamp").isNotEmpty()
+        .jsonPath("$.path").isEqualTo("/delete/error")
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.error").isEqualTo("Internal Server Error")
+        .jsonPath("$.requestId").isNotEmpty();
   }
 
 }

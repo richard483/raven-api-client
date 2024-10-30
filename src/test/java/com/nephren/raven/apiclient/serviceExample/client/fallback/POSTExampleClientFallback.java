@@ -5,7 +5,10 @@ import com.nephren.raven.apiclient.serviceExample.model.ServerRequestBody;
 import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -19,4 +22,43 @@ public class POSTExampleClientFallback implements POSTExampleClient {
     serverResponseBody.setMessage("Fallback during calling postRequest");
     return Mono.just(ResponseEntity.ok(serverResponseBody));
   }
+
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipart(FilePart file) {
+    return null;
+  }
+
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBody() {
+    return null;
+  }
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartNoBodyPathVariable(
+      String name) {
+    return null;
+  }
+
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveFlux(
+      Flux<FilePart> file) {
+    return null;
+  }
+
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestMultipartReactiveMono(
+      Mono<FilePart> file) {
+    return null;
+  }
+
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationForm(
+      MultiValueMap<String, String> requestBody) {
+    return null;
+  }
+
+  @Override
+  public Mono<ResponseEntity<ServerResponseBody>> postRequestApplicationFormNoBody() {
+    return null;
+  }
+
 }
