@@ -321,14 +321,17 @@ public class RequestMappingMetadataBuilder {
       String[] headers = (String[]) annotation.getClass().getMethod("headers").invoke(annotation);
       String[] path = (String[]) annotation.getClass().getMethod("path").invoke(annotation);
       String[] value = (String[]) annotation.getClass().getMethod("value").invoke(annotation);
-      RequestMethod[] methodValue = new RequestMethod[] {getRequestMethod(annotationType)};
+      RequestMethod requestMethod = getRequestMethod(annotationType);
+      RequestMethod[] requestMethodMappingValue = new RequestMethod[] {requestMethod == null ?
+          ((RequestMethod[]) annotation.getClass().getMethod("method").invoke(annotation))[0] :
+          requestMethod };
       return RavenRequestMapping.builder()
           .consumes(consumes)
           .produces(produces)
           .headers(headers)
           .path(path)
           .value(value)
-          .method(methodValue)
+          .method(requestMethodMappingValue)
           .build();
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
       log.error("#RavenApiClient getAnnotation got error trace: ");
@@ -343,6 +346,7 @@ public class RequestMappingMetadataBuilder {
       case "PostMapping" -> RequestMethod.POST;
       case "PatchMapping" -> RequestMethod.PATCH;
       case "DeleteMapping" -> RequestMethod.DELETE;
+      case "RequestMapping" -> null;
       default -> RequestMethod.GET;
     };
   }

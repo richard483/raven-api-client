@@ -177,8 +177,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       case RequestMethod.POST -> webClient.post();
       case RequestMethod.PUT -> webClient.put();
       case RequestMethod.DELETE -> webClient.delete();
-      case RequestMethod.HEAD -> webClient.head();
-      case RequestMethod.OPTIONS -> webClient.options();
       case RequestMethod.PATCH -> webClient.patch();
       default -> throw new UnsupportedOperationException(
           "#RavenAPIClientMethodInterceptor Unsupported method: " + methodName);
