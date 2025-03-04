@@ -129,6 +129,15 @@ class RavenApiClientGetTests {
   }
 
   @Test
+  void getRequestWithQueryParamCollection() {
+    webTestClient.get().uri("http://localhost:8080/get/withQueryParamAndCollection?names=Richard,Nephren,William")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with names: [Richard, Nephren, William] with the length of: 3");
+  }
+
+  @Test
   void getRequestWithPathVariable() {
     webTestClient.get().uri("http://localhost:8080/get/withPathVariable/TowaSama")
         .exchange()

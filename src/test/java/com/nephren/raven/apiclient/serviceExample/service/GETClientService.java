@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Service
 public class GETClientService {
 
@@ -70,6 +72,11 @@ public class GETClientService {
   public Mono<ResponseEntity<String>> getRequestWithQueryParam(
       String nameQueryParam, String ageQueryParam) {
     return getExampleClient.getRequestWithQueryParam(nameQueryParam, ageQueryParam);
+  }
+
+  public Mono<ResponseEntity<String>> getRequestQueryParamCollection(
+      List<String> namesQueryParam) {
+    return getExampleClient.getRequestQueryParamCollection(namesQueryParam);
   }
 
   public Mono<ResponseEntity<String>> getRequestWithPathVariable(String var) {

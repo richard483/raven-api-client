@@ -1,8 +1,15 @@
 package com.nephren.raven.apiclient.serviceExample.server;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 public class GETServerController {
@@ -35,6 +42,13 @@ public class GETServerController {
       @RequestParam("name") String nameQueryParam, @RequestParam("age") String ageQueryParam) {
     return Mono.just(ResponseEntity.ok()
         .body("Message received with name: " + nameQueryParam + " and age: " + ageQueryParam));
+  }
+
+  @GetMapping(path = "/getRequest-queryParam-collection")
+  public Mono<ResponseEntity<String>> getRequestQueryParamCollection(
+      @RequestParam("names") List<String> collectionQueryParam) {
+    return Mono.just(ResponseEntity.ok()
+        .body("Message received with names: " + collectionQueryParam.toString() + " with the length of: " + collectionQueryParam.size()));
   }
 
   @GetMapping(path = "/getRequest-pathVariable/{variable}")

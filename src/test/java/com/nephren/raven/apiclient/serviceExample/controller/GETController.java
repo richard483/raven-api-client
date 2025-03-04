@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("get")
 public class GETController {
@@ -76,6 +78,12 @@ public class GETController {
   public Mono<ResponseEntity<String>> getRequestWithQueryParam(
       @RequestParam String name, @RequestParam String age) {
     return clientService.getRequestWithQueryParam(name, age);
+  }
+
+  @GetMapping("/withQueryParamAndCollection")
+  public Mono<ResponseEntity<String>> getRequestWithQueryParamCollection(
+      @RequestParam List<String> names) {
+    return clientService.getRequestQueryParamCollection(names);
   }
 
   @GetMapping("/withPathVariable/{var}")
