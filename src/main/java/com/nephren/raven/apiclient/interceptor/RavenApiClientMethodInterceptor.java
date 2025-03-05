@@ -210,8 +210,8 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return spec;
   }
 
-  private Mono doBody(
-      WebClient.RequestHeadersSpec<?> client, Method method, String methodName,
+  private <T extends WebClient.RequestHeadersSpec<?> > Mono<? extends WebClient.RequestHeadersSpec<?>> doBody(
+      T client, Method method, String methodName,
       Object[] arguments) {
     if (client instanceof WebClient.RequestBodySpec bodySpec) {
       String contentType = metadata.getContentTypes().get(methodName);
@@ -234,12 +234,12 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return Mono.just(client);
   }
 
-  private Mono doResponse(Mono<WebClient.RequestHeadersSpec<?>> client, String methodName) {
+  private Mono doResponse(Mono<? extends WebClient.RequestHeadersSpec<?>> client, String methodName) {
     Type type = metadata.getResponseBodyClasses().get(methodName);
     return handleResponseType(client, type);
   }
 
-  private Mono handleResponseType(Mono<WebClient.RequestHeadersSpec<?>> client, Type type) {
+  private Mono handleResponseType(Mono<? extends WebClient.RequestHeadersSpec<?>> client, Type type) {
     if (type instanceof ParameterizedType parameterizedType) {
       return handleParameterizedType(client, parameterizedType);
     } else {
@@ -247,7 +247,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     }
   }
 
-  private Mono handleParameterizedType(Mono<WebClient.RequestHeadersSpec<?>> client,
+  private Mono handleParameterizedType(Mono< ? extends WebClient.RequestHeadersSpec<?>> client,
                                        ParameterizedType parameterizedType) {
     if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
       return handleResponseEntity(client, parameterizedType);
@@ -257,11 +257,13 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     }
   }
 
-  private Mono handleResponseEntity(Mono<WebClient.RequestHeadersSpec<?>> client, ParameterizedType parameterizedType) {
+  private Mono handleResponseEntity(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
+      ParameterizedType parameterizedType) {
     return handleResponseSpec(getResponseEntitySpec(client), parameterizedType);
   }
 
-  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(Mono<WebClient.RequestHeadersSpec<?>> client) {
+  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(Mono<? extends WebClient.RequestHeadersSpec<
+      ?>> client) {
     // TODO: need to update error handling
     return client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
         clientResponse -> Mono.empty()));
