@@ -185,12 +185,14 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   private WebClient.RequestHeadersSpec<?> getUriBuilder(
       String methodName, Object[] arguments, WebClient.RequestHeadersUriSpec<?> client) {
-    if (metadata.getApiUrlPositions().containsKey(methodName)) {
-      String baseUrl = (String) arguments[metadata.getApiUrlPositions().get(methodName)];
-      return client.uri(baseUrl, uriBuilder -> getUri(uriBuilder, methodName, arguments));
-    } else {
+    // TODO: maybe we could develop the dynamic URL feature later, but for now, we will just use the static URL
+//    if (metadata.getApiUrlPositions().containsKey(methodName)) {
+//      String baseUrl = (String) arguments[metadata.getApiUrlPositions().get(methodName)];
+//      return client.uri(baseUrl, uriBuilder -> getUri(uriBuilder, methodName, arguments));
+//    } else {
+//      return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
+//    }
       return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
-    }
   }
 
   private WebClient.RequestHeadersSpec<?> doHeader(
