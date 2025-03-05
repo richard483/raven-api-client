@@ -27,6 +27,15 @@ class RavenApiClientGetTests {
   }
 
   @Test
+  void getRequestWithRequestMapping() {
+    webTestClient.get().uri("http://localhost:8080/get/request-mapping")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Hello, World!");
+  }
+
+  @Test
   void getRequestNoPath() {
     webTestClient.get().uri("http://localhost:8080/get/no-path")
         .exchange()

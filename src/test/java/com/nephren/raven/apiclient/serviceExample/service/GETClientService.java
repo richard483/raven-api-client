@@ -37,6 +37,10 @@ public class GETClientService {
     return getExampleClient.getRequest();
   }
 
+  public Mono<ResponseEntity<String>> getRequestWithRequestMapping() {
+    return getExampleClient.getRequestWithRequestMapping();
+  }
+
   public Mono<ResponseEntity<String>> getRequestISE() {
     return getExampleClient.getRequestISE();
   }

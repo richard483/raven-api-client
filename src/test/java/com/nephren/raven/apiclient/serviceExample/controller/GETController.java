@@ -34,6 +34,11 @@ public class GETController {
     return clientService.getRequest();
   }
 
+  @GetMapping("/request-mapping")
+  public Mono<ResponseEntity<String>> getRequestWithRequestMapping() {
+    return clientService.getRequestWithRequestMapping();
+  }
+
   @GetMapping("/ISE")
   public Mono<ResponseEntity<String>> getRequestISE() {
     return clientService.getRequestISE();
