@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient.serviceExample.service;
 
+import com.nephren.raven.apiclient.serviceExample.client.EmptyExampleClient;
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithFallback;
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithOtherFallback;
 import com.nephren.raven.apiclient.serviceExample.client.GETExampleClient;
@@ -19,14 +20,18 @@ public class GETClientService {
 
   private final ExampleClientWithOtherFallback exampleClientWithOtherFallback;
 
+  private final EmptyExampleClient emptyExampleClient;
+
   @Autowired
   public GETClientService(
       GETExampleClient getExampleClient,
       ExampleClientWithFallback exampleClientWithFallback,
-      ExampleClientWithOtherFallback exampleClientWithOtherFallback) {
+      ExampleClientWithOtherFallback exampleClientWithOtherFallback,
+      EmptyExampleClient emptyExampleClient) {
     this.getExampleClient = getExampleClient;
     this.exampleClientWithFallback = exampleClientWithFallback;
     this.exampleClientWithOtherFallback = exampleClientWithOtherFallback;
+    this.emptyExampleClient = emptyExampleClient;
   }
 
   public Mono<ResponseEntity<String>> getRequestNoPath() {
