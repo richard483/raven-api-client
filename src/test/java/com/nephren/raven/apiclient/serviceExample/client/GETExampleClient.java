@@ -62,4 +62,8 @@ public interface GETExampleClient {
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestWithCookieParam(@CookieValue("username") String username);
 
+  @GetMapping(value = "/getRequest-list",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<List<String>>> getRequestList();
+
 }

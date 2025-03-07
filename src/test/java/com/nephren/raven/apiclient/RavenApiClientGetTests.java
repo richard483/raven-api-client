@@ -1,10 +1,12 @@
 package com.nephren.raven.apiclient;
 
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -164,6 +166,18 @@ class RavenApiClientGetTests {
         .isOk()
         .expectBody(String.class)
         .isEqualTo("Message received and contain username cookie of TowaSama");
+  }
+
+  @Test
+  void getRequestList() {
+    // TODO: need to investigate why the list response is wrapped in another list, and why it was
+    //  there (based on reference library), and remove it if it's not needed
+    webTestClient.get().uri("http://localhost:8080/get/list")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo("[\"[\\\"Hello\\\",\\\"こんいちわ\\\",\\\"Hola\\\",\\\"Bonjour\\\",\\\"Hallo\\\"]\"]");
   }
 
 }

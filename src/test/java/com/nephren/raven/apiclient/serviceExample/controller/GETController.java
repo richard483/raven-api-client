@@ -103,4 +103,9 @@ public class GETController {
     return clientService.getRequestWithCookieParam(username);
   }
 
+  @GetMapping("/list")
+  public Mono<ResponseEntity<List<String>>> getRequestList() {
+    return clientService.getRequestList();
+  }
+
 }

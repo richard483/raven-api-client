@@ -96,4 +96,8 @@ public class GETClientService {
     return getExampleClient.getRequestWithCookieParam(username);
   }
 
+  public Mono<ResponseEntity<List<String>>> getRequestList() {
+    return getExampleClient.getRequestList();
+  }
+
 }

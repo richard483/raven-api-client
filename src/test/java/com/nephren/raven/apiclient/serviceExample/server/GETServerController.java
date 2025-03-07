@@ -65,4 +65,9 @@ public class GETServerController {
         .body("Message received and contain username cookie of " + username));
   }
 
+  @GetMapping(path = "/getRequest-list")
+  public Mono<ResponseEntity<List<String>>> getRequestList() {
+    return Mono.just(ResponseEntity.ok(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo")));
+  }
+
 }
