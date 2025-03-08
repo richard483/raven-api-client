@@ -192,7 +192,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 //    } else {
 //      return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
 //    }
-      return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
+    return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
   }
 
   private WebClient.RequestHeadersSpec<?> doHeader(
@@ -212,7 +212,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return spec;
   }
 
-  private <T extends WebClient.RequestHeadersSpec<?> > Mono<? extends WebClient.RequestHeadersSpec<?>> doBody(
+  private <T extends WebClient.RequestHeadersSpec<?>> Mono<? extends WebClient.RequestHeadersSpec<?>> doBody(
       T client, Method method, String methodName,
       Object[] arguments) {
     if (client instanceof WebClient.RequestBodySpec bodySpec) {
@@ -249,7 +249,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     }
   }
 
-  private Mono handleParameterizedType(Mono< ? extends WebClient.RequestHeadersSpec<?>> client,
+  private Mono handleParameterizedType(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
                                        ParameterizedType parameterizedType) {
     if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
       return handleResponseEntity(client, parameterizedType);
@@ -260,7 +260,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private Mono handleResponseEntity(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
-      ParameterizedType parameterizedType) {
+                                    ParameterizedType parameterizedType) {
     return handleResponseSpec(getResponseEntitySpec(client), parameterizedType);
   }
 
@@ -282,7 +282,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private Mono handleListResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
-    return responseSpec.flatMap(respEntity -> respEntity.toEntityList(
+    return responseSpec.flatMap(respEntity -> respEntity.toEntity(
         ParameterizedTypeReference.forType(
             parameterizedType.getActualTypeArguments()[0])));
   }
