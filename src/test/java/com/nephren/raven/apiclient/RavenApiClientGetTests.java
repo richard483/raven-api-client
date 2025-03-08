@@ -178,4 +178,24 @@ class RavenApiClientGetTests {
         .isEqualTo(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo"));
   }
 
+  @Test
+  void getRequestWithoutResponseEntity() {
+    webTestClient.get().uri("http://localhost:8080/get/withoutResponseEntity")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo("Hello, World! From string without ResponseEntity");
+  }
+
+  @Test
+  void getRequestListWithoutResponseEntity() {
+    webTestClient.get().uri("http://localhost:8080/get/listWithoutResponseEntity")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(List.class)
+        .isEqualTo(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo"));
+  }
+
 }

@@ -66,4 +66,11 @@ public interface GETExampleClient {
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<List<String>>> getRequestList();
 
+  @GetMapping(value = "/getRequest-withoutResponseEntity",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<String> getRequestWithoutResponseEntity();
+
+  @GetMapping(value = "/getRequest-listWithoutResponseEntity")
+  Mono<List<String>> getRequestListWithoutResponseEntity();
+
 }

@@ -108,4 +108,14 @@ public class GETController {
     return clientService.getRequestList();
   }
 
+  @GetMapping("/withoutResponseEntity")
+  public Mono<String> getRequestWithoutResponseEntity() {
+    return clientService.getRequestWithoutResponseEntity();
+  }
+
+  @GetMapping(value = "/listWithoutResponseEntity")
+  public Mono<List<String>> getRequestListWithoutResponseEntity() {
+    return clientService.getRequestListWithoutResponseEntity();
+  }
+
 }

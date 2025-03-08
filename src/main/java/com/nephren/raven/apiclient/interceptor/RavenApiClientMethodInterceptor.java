@@ -255,7 +255,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       return handleResponseEntity(client, parameterizedType);
     } else {
       return client.flatMap(
-          c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType)));
+          c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType.getRawType())));
     }
   }
 

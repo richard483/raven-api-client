@@ -70,4 +70,14 @@ public class GETServerController {
     return Mono.just(ResponseEntity.ok(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo")));
   }
 
+  @GetMapping(path = "/getRequest-withoutResponseEntity")
+  public Mono<String> getRequestWithoutResponseEntity() {
+    return Mono.just("Hello, World! From string without ResponseEntity");
+  }
+
+  @GetMapping(path = "/getRequest-listWithoutResponseEntity")
+  public Mono<List<String>> getRequestListWithoutResponseEntity() {
+    return Mono.just(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo"));
+  }
+
 }

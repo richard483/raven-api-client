@@ -100,4 +100,12 @@ public class GETClientService {
     return getExampleClient.getRequestList();
   }
 
+  public Mono<String> getRequestWithoutResponseEntity() {
+    return getExampleClient.getRequestWithoutResponseEntity();
+  }
+
+  public Mono<List<String>> getRequestListWithoutResponseEntity() {
+    return getExampleClient.getRequestListWithoutResponseEntity();
+  }
+
 }
