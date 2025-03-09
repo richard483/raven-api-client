@@ -39,6 +39,11 @@ public class GETController {
     return clientService.getRequestWithRequestMapping();
   }
 
+  @GetMapping("/request-mapping-unsupported")
+  public Mono<ResponseEntity<String>> getRequestWithRequestMappingUnsupportedMethod() {
+    return clientService.getRequestWithRequestMappingUnsupportedMethod();
+  }
+
   @GetMapping("/ISE")
   public Mono<ResponseEntity<String>> getRequestISE() {
     return clientService.getRequestISE();

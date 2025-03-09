@@ -46,6 +46,10 @@ public class GETClientService {
     return getExampleClient.getRequestWithRequestMapping();
   }
 
+  public Mono<ResponseEntity<String>> getRequestWithRequestMappingUnsupportedMethod() {
+    return getExampleClient.getRequestWithRequestMappingUnsupportedMethod();
+  }
+
   public Mono<ResponseEntity<String>> getRequestISE() {
     return getExampleClient.getRequestISE();
   }
