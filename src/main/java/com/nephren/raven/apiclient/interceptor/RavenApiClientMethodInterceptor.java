@@ -177,8 +177,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       case RequestMethod.POST -> webClient.post();
       case RequestMethod.PUT -> webClient.put();
       case RequestMethod.DELETE -> webClient.delete();
-      case RequestMethod.HEAD -> webClient.head();
-      case RequestMethod.OPTIONS -> webClient.options();
       case RequestMethod.PATCH -> webClient.patch();
       default -> throw new UnsupportedOperationException(
           "#RavenAPIClientMethodInterceptor Unsupported method: " + methodName);
@@ -187,12 +185,14 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   private WebClient.RequestHeadersSpec<?> getUriBuilder(
       String methodName, Object[] arguments, WebClient.RequestHeadersUriSpec<?> client) {
-    if (metadata.getApiUrlPositions().containsKey(methodName)) {
-      String baseUrl = (String) arguments[metadata.getApiUrlPositions().get(methodName)];
-      return client.uri(baseUrl, uriBuilder -> getUri(uriBuilder, methodName, arguments));
-    } else {
-      return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
-    }
+    // TODO: maybe we could develop the dynamic URL feature later, but for now, we will just use the static URL
+//    if (metadata.getApiUrlPositions().containsKey(methodName)) {
+//      String baseUrl = (String) arguments[metadata.getApiUrlPositions().get(methodName)];
+//      return client.uri(baseUrl, uriBuilder -> getUri(uriBuilder, methodName, arguments));
+//    } else {
+//      return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
+//    }
+    return client.uri(uriBuilder -> getUri(uriBuilder, methodName, arguments));
   }
 
   private WebClient.RequestHeadersSpec<?> doHeader(
@@ -212,8 +212,8 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return spec;
   }
 
-  private Mono doBody(
-      WebClient.RequestHeadersSpec<?> client, Method method, String methodName,
+  private <T extends WebClient.RequestHeadersSpec<?>> Mono<? extends WebClient.RequestHeadersSpec<?>> doBody(
+      T client, Method method, String methodName,
       Object[] arguments) {
     if (client instanceof WebClient.RequestBodySpec bodySpec) {
       String contentType = metadata.getContentTypes().get(methodName);
@@ -236,12 +236,12 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return Mono.just(client);
   }
 
-  private Mono doResponse(Mono<WebClient.RequestHeadersSpec<?>> client, String methodName) {
+  private Mono doResponse(Mono<? extends WebClient.RequestHeadersSpec<?>> client, String methodName) {
     Type type = metadata.getResponseBodyClasses().get(methodName);
     return handleResponseType(client, type);
   }
 
-  private Mono handleResponseType(Mono<WebClient.RequestHeadersSpec<?>> client, Type type) {
+  private Mono handleResponseType(Mono<? extends WebClient.RequestHeadersSpec<?>> client, Type type) {
     if (type instanceof ParameterizedType parameterizedType) {
       return handleParameterizedType(client, parameterizedType);
     } else {
@@ -249,21 +249,23 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     }
   }
 
-  private Mono handleParameterizedType(Mono<WebClient.RequestHeadersSpec<?>> client,
+  private Mono handleParameterizedType(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
                                        ParameterizedType parameterizedType) {
     if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
       return handleResponseEntity(client, parameterizedType);
     } else {
       return client.flatMap(
-          c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType)));
+          c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType.getRawType())));
     }
   }
 
-  private Mono handleResponseEntity(Mono<WebClient.RequestHeadersSpec<?>> client, ParameterizedType parameterizedType) {
+  private Mono handleResponseEntity(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
+                                    ParameterizedType parameterizedType) {
     return handleResponseSpec(getResponseEntitySpec(client), parameterizedType);
   }
 
-  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(Mono<WebClient.RequestHeadersSpec<?>> client) {
+  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(Mono<? extends WebClient.RequestHeadersSpec<
+      ?>> client) {
     // TODO: need to update error handling
     return client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
         clientResponse -> Mono.empty()));
@@ -280,7 +282,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private Mono handleListResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
-    return responseSpec.flatMap(respEntity -> respEntity.toEntityList(
+    return responseSpec.flatMap(respEntity -> respEntity.toEntity(
         ParameterizedTypeReference.forType(
             parameterizedType.getActualTypeArguments()[0])));
   }

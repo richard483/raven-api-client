@@ -14,18 +14,27 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>raven-apiclient</name>
     <description>raven-apiclient</description>
-    <url/>
+    <url>https://github.com/richard483/raven-api-client</url>
     <licenses>
-        <license/>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>richard483</id>
+            <name>Richard William</name>
+            <email>richard.william483@gmail.com</email>
+            <url>https://github.com/richard483</url>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:git://github.com/richard483/raven-api-client.git</connection>
+        <developerConnection>scm:git:ssh://github.com/richard483/raven-api-client.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/richard483/raven-api-client</url>
     </scm>
     <properties>
         <java.version>21</java.version>
@@ -57,6 +66,12 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -68,5 +83,11 @@
             </plugin>
         </plugins>
     </build>
-
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>richard483</name>
+            <url>https://maven.pkg.github.com/richard483/raven-api-client</url>
+        </repository>
+    </distributionManagement>
 </project>

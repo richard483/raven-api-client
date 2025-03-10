@@ -3,8 +3,16 @@ package com.nephren.raven.apiclient.serviceExample.client;
 import com.nephren.raven.apiclient.annotation.RavenApiClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RavenApiClient(name = "getExampleClient")
 public interface GETExampleClient {
@@ -15,6 +23,14 @@ public interface GETExampleClient {
   @GetMapping(value = "/getRequest",
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequest();
+
+  @RequestMapping(value = "/getRequest",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<String>> getRequestWithRequestMapping();
+
+  @RequestMapping(value = "/getRequest",
+      produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.OPTIONS)
+  Mono<ResponseEntity<String>> getRequestWithRequestMappingUnsupportedMethod();
 
   @GetMapping(value = "/getRequest-ISE",
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -38,11 +54,28 @@ public interface GETExampleClient {
   Mono<ResponseEntity<String>> getRequestWithQueryParam(
       @RequestParam("name") String nameQueryParam, @RequestParam("age") String ageQueryParam);
 
+  @GetMapping(value = "/getRequest-queryParam-collection",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      params = {"names"})
+  Mono<ResponseEntity<String>> getRequestQueryParamCollection(
+      @RequestParam("names") List<String> namesQueryParam);
+
   @GetMapping(path = "/getRequest-pathVariable/{variable}")
   Mono<ResponseEntity<String>> getRequestPathVariable(@PathVariable("variable") String variable);
 
   @GetMapping(value = "/getRequest-cookieParam",
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<ResponseEntity<String>> getRequestWithCookieParam(@CookieValue("username") String username);
+
+  @GetMapping(value = "/getRequest-list",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<List<String>>> getRequestList();
+
+  @GetMapping(value = "/getRequest-withoutResponseEntity",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<String> getRequestWithoutResponseEntity();
+
+  @GetMapping(value = "/getRequest-listWithoutResponseEntity")
+  Mono<List<String>> getRequestListWithoutResponseEntity();
 
 }

@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.util.List;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
 class RavenApiClientGetTests {
@@ -24,6 +26,23 @@ class RavenApiClientGetTests {
         .expectStatus()
         .isOk()
         .expectBody(String.class).isEqualTo("Hello, World!");
+  }
+
+  @Test
+  void getRequestWithRequestMapping() {
+    webTestClient.get().uri("http://localhost:8080/get/request-mapping")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Hello, World!");
+  }
+
+  @Test
+  void getRequestWithRequestMappingUnsupportedMethod() {
+    webTestClient.get().uri("http://localhost:8080/get/request-mapping-unsupported")
+        .exchange()
+        .expectStatus()
+        .is5xxServerError();
   }
 
   @Test
@@ -129,6 +148,15 @@ class RavenApiClientGetTests {
   }
 
   @Test
+  void getRequestWithQueryParamCollection() {
+    webTestClient.get().uri("http://localhost:8080/get/withQueryParamAndCollection?names=Richard,Nephren,William")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class).isEqualTo("Message received with names: [Richard, Nephren, William] with the length of: 3");
+  }
+
+  @Test
   void getRequestWithPathVariable() {
     webTestClient.get().uri("http://localhost:8080/get/withPathVariable/TowaSama")
         .exchange()
@@ -146,6 +174,36 @@ class RavenApiClientGetTests {
         .isOk()
         .expectBody(String.class)
         .isEqualTo("Message received and contain username cookie of TowaSama");
+  }
+
+  @Test
+  void getRequestList() {
+    webTestClient.get().uri("http://localhost:8080/get/list")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(List.class)
+        .isEqualTo(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo"));
+  }
+
+  @Test
+  void getRequestWithoutResponseEntity() {
+    webTestClient.get().uri("http://localhost:8080/get/withoutResponseEntity")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo("Hello, World! From string without ResponseEntity");
+  }
+
+  @Test
+  void getRequestListWithoutResponseEntity() {
+    webTestClient.get().uri("http://localhost:8080/get/listWithoutResponseEntity")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(List.class)
+        .isEqualTo(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo"));
   }
 
 }

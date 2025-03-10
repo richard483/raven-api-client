@@ -10,6 +10,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -310,7 +311,7 @@ public class RequestMappingMetadataBuilder {
     return null;
   }
 
-  private <T extends java.lang.annotation.Annotation> RavenRequestMapping getAnnotation(
+  private <T extends Annotation> RavenRequestMapping getAnnotation(
       Method method, Class<T> annotationType) {
     try {
       T annotation = method.getAnnotation(annotationType);
@@ -321,14 +322,14 @@ public class RequestMappingMetadataBuilder {
       String[] headers = (String[]) annotation.getClass().getMethod("headers").invoke(annotation);
       String[] path = (String[]) annotation.getClass().getMethod("path").invoke(annotation);
       String[] value = (String[]) annotation.getClass().getMethod("value").invoke(annotation);
-      RequestMethod[] methodValue = new RequestMethod[] {getRequestMethod(annotationType)};
+      RequestMethod[] requestMethod = getRequestMethod(annotation, annotationType);
       return RavenRequestMapping.builder()
           .consumes(consumes)
           .produces(produces)
           .headers(headers)
           .path(path)
           .value(value)
-          .method(methodValue)
+          .method(requestMethod)
           .build();
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
       log.error("#RavenApiClient getAnnotation got error trace: ");
@@ -337,13 +338,16 @@ public class RequestMappingMetadataBuilder {
     return null;
   }
 
-  private RequestMethod getRequestMethod(Class clazz) {
-    return switch (clazz.getSimpleName()) {
-      case "PutMapping" -> RequestMethod.PUT;
-      case "PostMapping" -> RequestMethod.POST;
-      case "PatchMapping" -> RequestMethod.PATCH;
-      case "DeleteMapping" -> RequestMethod.DELETE;
-      default -> RequestMethod.GET;
+  private <T extends Annotation> RequestMethod[] getRequestMethod(T annotation,
+      Class<T> annotationType)
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    return switch (annotationType.getSimpleName()) {
+      case "PutMapping" -> List.of(RequestMethod.PUT).toArray(new RequestMethod[0]);
+      case "PostMapping" -> List.of(RequestMethod.POST).toArray(new RequestMethod[0]);
+      case "PatchMapping" -> List.of(RequestMethod.PATCH).toArray(new RequestMethod[0]);
+      case "DeleteMapping" -> List.of(RequestMethod.DELETE).toArray(new RequestMethod[0]);
+      case "RequestMapping" -> (RequestMethod[]) annotation.getClass().getMethod("method").invoke(annotation);
+      default -> List.of(RequestMethod.GET).toArray(new RequestMethod[0]);
     };
   }
 

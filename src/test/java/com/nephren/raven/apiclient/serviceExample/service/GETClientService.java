@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient.serviceExample.service;
 
+import com.nephren.raven.apiclient.serviceExample.client.EmptyExampleClient;
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithFallback;
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithOtherFallback;
 import com.nephren.raven.apiclient.serviceExample.client.GETExampleClient;
@@ -7,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 public class GETClientService {
@@ -17,14 +20,18 @@ public class GETClientService {
 
   private final ExampleClientWithOtherFallback exampleClientWithOtherFallback;
 
+  private final EmptyExampleClient emptyExampleClient;
+
   @Autowired
   public GETClientService(
       GETExampleClient getExampleClient,
       ExampleClientWithFallback exampleClientWithFallback,
-      ExampleClientWithOtherFallback exampleClientWithOtherFallback) {
+      ExampleClientWithOtherFallback exampleClientWithOtherFallback,
+      EmptyExampleClient emptyExampleClient) {
     this.getExampleClient = getExampleClient;
     this.exampleClientWithFallback = exampleClientWithFallback;
     this.exampleClientWithOtherFallback = exampleClientWithOtherFallback;
+    this.emptyExampleClient = emptyExampleClient;
   }
 
   public Mono<ResponseEntity<String>> getRequestNoPath() {
@@ -33,6 +40,14 @@ public class GETClientService {
 
   public Mono<ResponseEntity<String>> getRequest() {
     return getExampleClient.getRequest();
+  }
+
+  public Mono<ResponseEntity<String>> getRequestWithRequestMapping() {
+    return getExampleClient.getRequestWithRequestMapping();
+  }
+
+  public Mono<ResponseEntity<String>> getRequestWithRequestMappingUnsupportedMethod() {
+    return getExampleClient.getRequestWithRequestMappingUnsupportedMethod();
   }
 
   public Mono<ResponseEntity<String>> getRequestISE() {
@@ -72,12 +87,29 @@ public class GETClientService {
     return getExampleClient.getRequestWithQueryParam(nameQueryParam, ageQueryParam);
   }
 
+  public Mono<ResponseEntity<String>> getRequestQueryParamCollection(
+      List<String> namesQueryParam) {
+    return getExampleClient.getRequestQueryParamCollection(namesQueryParam);
+  }
+
   public Mono<ResponseEntity<String>> getRequestWithPathVariable(String var) {
     return getExampleClient.getRequestPathVariable(var);
   }
 
   public Mono<ResponseEntity<String>> getRequestWithCookieParam(String username) {
     return getExampleClient.getRequestWithCookieParam(username);
+  }
+
+  public Mono<ResponseEntity<List<String>>> getRequestList() {
+    return getExampleClient.getRequestList();
+  }
+
+  public Mono<String> getRequestWithoutResponseEntity() {
+    return getExampleClient.getRequestWithoutResponseEntity();
+  }
+
+  public Mono<List<String>> getRequestListWithoutResponseEntity() {
+    return getExampleClient.getRequestListWithoutResponseEntity();
   }
 
 }

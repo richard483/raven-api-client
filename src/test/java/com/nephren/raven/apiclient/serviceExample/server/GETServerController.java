@@ -1,8 +1,15 @@
 package com.nephren.raven.apiclient.serviceExample.server;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 public class GETServerController {
@@ -37,6 +44,13 @@ public class GETServerController {
         .body("Message received with name: " + nameQueryParam + " and age: " + ageQueryParam));
   }
 
+  @GetMapping(path = "/getRequest-queryParam-collection")
+  public Mono<ResponseEntity<String>> getRequestQueryParamCollection(
+      @RequestParam("names") List<String> collectionQueryParam) {
+    return Mono.just(ResponseEntity.ok()
+        .body("Message received with names: " + collectionQueryParam.toString() + " with the length of: " + collectionQueryParam.size()));
+  }
+
   @GetMapping(path = "/getRequest-pathVariable/{variable}")
   public Mono<ResponseEntity<String>> getRequestPathVariable(
       @PathVariable("variable") String variable) {
@@ -49,6 +63,21 @@ public class GETServerController {
       @CookieValue("username") String username) {
     return Mono.just(ResponseEntity.ok()
         .body("Message received and contain username cookie of " + username));
+  }
+
+  @GetMapping(path = "/getRequest-list")
+  public Mono<ResponseEntity<List<String>>> getRequestList() {
+    return Mono.just(ResponseEntity.ok(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo")));
+  }
+
+  @GetMapping(path = "/getRequest-withoutResponseEntity")
+  public Mono<String> getRequestWithoutResponseEntity() {
+    return Mono.just("Hello, World! From string without ResponseEntity");
+  }
+
+  @GetMapping(path = "/getRequest-listWithoutResponseEntity")
+  public Mono<List<String>> getRequestListWithoutResponseEntity() {
+    return Mono.just(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo"));
   }
 
 }

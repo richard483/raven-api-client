@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("get")
 public class GETController {
@@ -30,6 +32,16 @@ public class GETController {
   @GetMapping()
   public Mono<ResponseEntity<String>> getRequest() {
     return clientService.getRequest();
+  }
+
+  @GetMapping("/request-mapping")
+  public Mono<ResponseEntity<String>> getRequestWithRequestMapping() {
+    return clientService.getRequestWithRequestMapping();
+  }
+
+  @GetMapping("/request-mapping-unsupported")
+  public Mono<ResponseEntity<String>> getRequestWithRequestMappingUnsupportedMethod() {
+    return clientService.getRequestWithRequestMappingUnsupportedMethod();
   }
 
   @GetMapping("/ISE")
@@ -78,6 +90,12 @@ public class GETController {
     return clientService.getRequestWithQueryParam(name, age);
   }
 
+  @GetMapping("/withQueryParamAndCollection")
+  public Mono<ResponseEntity<String>> getRequestWithQueryParamCollection(
+      @RequestParam List<String> names) {
+    return clientService.getRequestQueryParamCollection(names);
+  }
+
   @GetMapping("/withPathVariable/{var}")
   public Mono<ResponseEntity<String>> getRequestWithPathVariable(
       @PathVariable(value = "var") String var) {
@@ -88,6 +106,21 @@ public class GETController {
   public Mono<ResponseEntity<String>> getRequestWithCookieParam(
       @CookieValue("username") String username) {
     return clientService.getRequestWithCookieParam(username);
+  }
+
+  @GetMapping("/list")
+  public Mono<ResponseEntity<List<String>>> getRequestList() {
+    return clientService.getRequestList();
+  }
+
+  @GetMapping("/withoutResponseEntity")
+  public Mono<String> getRequestWithoutResponseEntity() {
+    return clientService.getRequestWithoutResponseEntity();
+  }
+
+  @GetMapping(value = "/listWithoutResponseEntity")
+  public Mono<List<String>> getRequestListWithoutResponseEntity() {
+    return clientService.getRequestListWithoutResponseEntity();
   }
 
 }
