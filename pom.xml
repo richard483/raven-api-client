@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.nephren</groupId>
     <artifactId>raven-apiclient</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.15-SNAPSHOT</version>
     <name>raven-apiclient</name>
     <description>raven-apiclient</description>
     <url>https://github.com/richard483/raven-api-client</url>
@@ -61,8 +61,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
     </dependencies>
 
