@@ -6,12 +6,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>2.7.18</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.nephren</groupId>
     <artifactId>raven-apiclient</artifactId>
-    <version>0.0.16-SNAPSHOT</version>
+    <version>0.0.16-2-SNAPSHOT</version>
     <name>raven-apiclient</name>
     <description>raven-apiclient</description>
     <url>https://github.com/richard483/raven-api-client</url>
