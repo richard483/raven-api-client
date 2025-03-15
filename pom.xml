@@ -79,6 +79,14 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <!-- Rely on MAVEN_GPG_PASSPHRASE env variable -->
+                    <useAgent>true</useAgent>
+                    <gpgArguments>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

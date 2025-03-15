@@ -25,23 +25,20 @@ jobs:
                 <password>${{ secrets.OSSRH_TOKEN }}</password>
               </server>
             </servers>
-            <profiles>
-              <profile>
-                <id>gpg</id>
-                <activation>
-                  <activeByDefault>true</activeByDefault>
-                </activation>
-                <properties>
-                  <gpg.executable>gpg</gpg.executable>
-                  <gpg.passphrase>${{ secrets.GPG_PASSPHRASE }}</gpg.passphrase>
-                </properties>
-              </profile>
-            </profiles>
           </settings>
           EOF
 
       - name: Import GPG Key
         run: |
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          # Verify key import
+          gpg --list-secret-keys --keyid-format=long
+
       - name: Publish package
-        run: mvn --batch-mode deploy -DskipTests
+        run: |
+          gpg --batch --pinentry-mode loopback --passphrase "$MAVEN_GPG_PASSPHRASE" --import <<< "${{ secrets.GPG_PRIVATE_KEY }}"
+          mvn --batch-mode deploy -DskipTests
+        env:
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
