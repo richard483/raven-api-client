@@ -9,7 +9,7 @@
         <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.nephren</groupId>
+    <groupId>io.github.richard483</groupId>
     <artifactId>raven-apiclient</artifactId>
     <version>0.0.16-SNAPSHOT</version>
     <name>raven-apiclient</name>
@@ -31,10 +31,7 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git://github.com/richard483/raven-api-client.git</connection>
-        <developerConnection>scm:git:ssh://github.com/richard483/raven-api-client.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/richard483/raven-api-client</url>
+        <url>https://svn.apache.org/viewvc/maven</url>
     </scm>
     <properties>
         <java.version>21</java.version>
