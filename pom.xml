@@ -107,9 +107,10 @@
     </build>
     <distributionManagement>
         <repository>
-            <id>github</id>
-            <name>richard483</name>
-            <url>https://maven.pkg.github.com/richard483/raven-api-client</url>
+            <id>ossrh</id>
+            <name>Central Repository OSSRH</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
 </project>
