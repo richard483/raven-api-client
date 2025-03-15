@@ -1,13 +1,6 @@
 name: Publish package to the Maven Central Repository and GitHub Packages
 on:
   workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'     
-        required: true
-        default: 'warning'
-      tags:
-        description: 'Manually triggered'  
   release:
     types: [created]
 jobs:
