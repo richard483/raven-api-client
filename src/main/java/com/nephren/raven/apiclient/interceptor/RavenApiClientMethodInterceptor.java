@@ -232,7 +232,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       }
 
     }
-    log.warn("#RavenApiClientMethodInterceptor - doBody: No body resolver found for method: {}", methodName);
     return Mono.just(client);
   }
 

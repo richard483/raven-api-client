@@ -5,8 +5,7 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.web.reactive.function.BodyInserter;
 import reactor.core.publisher.Mono;
 
-public interface
-ApiBodyResolver {
+public interface ApiBodyResolver {
 
   boolean canResolve(String contentType);
 

@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.nephren.raven.apiclient.reactor.ReactorConfiguration,\
+com.nephren.raven.apiclient.configuration.RavenApiConfiguration
