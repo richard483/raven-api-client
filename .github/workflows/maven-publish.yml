@@ -1,35 +1,24 @@
-name: Publish package to the Maven Central Repository and GitHub Packages
-on:
-  workflow_dispatch:
-  release:
-    types: [created]
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-      - name: Publish to the Maven Central Repository
-        run: mvn --batch-mode deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-      - name: Set up Java for publishing to GitHub Packages
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Publish to GitHub Packages
-        run: mvn --batch-mode deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+- name: Set up Maven Central Repository
+  uses: actions/setup-java@v4
+  with:
+    java-version: '21'
+    distribution: 'temurin'
+    server-id: ossrh  # Must match the <id> in pom.xml's distributionManagement
+    server-username: ${{ secrets.OSSRH_USERNAME }}
+    server-password: ${{ secrets.OSSRH_TOKEN }}
+
+# Add this step to create settings.xml
+- name: Configure Maven settings.xml
+  run: |
+    mkdir -p ~/.m2
+    cat > ~/.m2/settings.xml <<EOF
+    <settings>
+      <servers>
+        <server>
+          <id>ossrh</id>
+          <username>${{ secrets.OSSRH_USERNAME }}</username>
+          <password>${{ secrets.OSSRH_TOKEN }}</password>
+        </server>
+      </servers>
+    </settings>
+    EOF
