@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.nephren</groupId>
     <artifactId>raven-apiclient</artifactId>
-    <version>0.0.17-SNAPSHOT</version>
+    <version>0.0.18-SNAPSHOT</version>
     <name>raven-apiclient</name>
     <description>raven-apiclient</description>
     <url>https://github.com/richard483/raven-api-client</url>
