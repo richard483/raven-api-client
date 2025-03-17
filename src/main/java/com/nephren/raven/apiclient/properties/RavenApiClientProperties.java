@@ -1,27 +1,33 @@
 package com.nephren.raven.apiclient.properties;
 
+import com.nephren.raven.apiclient.error.ApiErrorResolver;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ConfigurationProperties("nephren.raven.apiclient")
 public class RavenApiClientProperties {
+
   public static final String DEFAULT = "default";
 
   private Map<String, ApiClientConfigProperties> configs = new HashMap<>();
 
   private String packages;
 
+  /**
+   * Don't forget to update merge method with default properties at
+   * {@link PropertiesHelper#copyConfigPropertiesFromSourceToTarget(ApiClientConfigProperties,
+   * ApiClientConfigProperties)}
+   */
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
@@ -42,6 +48,7 @@ public class RavenApiClientProperties {
 
     private Map<String, String> headers = new HashMap<>();
 
+    private Class<? extends ApiErrorResolver> errorResolver;
   }
 
 }
