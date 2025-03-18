@@ -5,6 +5,14 @@ import lombok.Getter;
 import lombok.Value;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+/**
+ * RavenRequestMapping
+ * <p>
+ * The request mapping information includes the URL path, HTTP method, headers, content type, and
+ * response content type.
+ * </p>
+ */
+
 @Value
 @Builder
 @Getter
