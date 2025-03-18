@@ -1,17 +1,27 @@
-package com.nephren.raven.apiclient.interceptor;
+package com.nephren.raven.apiclient.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nephren.raven.apiclient.annotation.RavenApiClient;
-import com.nephren.raven.apiclient.aop.RequestMappingMetadata;
-import com.nephren.raven.apiclient.aop.RequestMappingMetadataBuilder;
 import com.nephren.raven.apiclient.aop.fallback.FallbackMetadata;
 import com.nephren.raven.apiclient.aop.fallback.FallbackMetadataBuilder;
 import com.nephren.raven.apiclient.aop.fallback.RavenApiClientFallback;
 import com.nephren.raven.apiclient.body.ApiBodyResolver;
+import com.nephren.raven.apiclient.errorresolver.ApiErrorResolver;
 import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -36,18 +46,6 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
 @Slf4j
 public class RavenApiClientMethodInterceptor implements InitializingBean, MethodInterceptor,
     ApplicationContextAware {
@@ -56,6 +54,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   private List<ApiBodyResolver> bodyResolvers;
   private WebClient webClient;
   private RavenApiClientFallback ravenApiClientFallback;
+  private ApiErrorResolver apiErrorResolver;
   @Setter
   private AnnotationMetadata annotationMetadata;
 
@@ -75,6 +74,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     prepareMetadata();
     prepareBodyResolvers();
     prepareWebClient();
+    prepareApiErrorResolver();
     prepareFallback();
     prepareScheduler();
 
@@ -97,6 +97,15 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
             httpHeaders -> metadata.getProperties().getHeaders().forEach(httpHeaders::add));
     webClient = builder.build();
 
+  }
+
+  private void prepareApiErrorResolver() {
+    RavenApiClient ravenApiClient = type.getAnnotation(RavenApiClient.class);
+    apiErrorResolver = applicationContext.getBean(ravenApiClient.errorResolver());
+
+    if (Objects.nonNull(metadata.getProperties().getErrorResolver())) {
+      apiErrorResolver = applicationContext.getBean(metadata.getProperties().getErrorResolver());
+    }
   }
 
   private void prepareFallback() {
@@ -222,7 +231,9 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
         if (bodyResolver.canResolve(contentType)) {
           return bodyResolver.resolve(method, arguments)
               .map(bodySpec::body).switchIfEmpty(Mono.defer(() -> {
-                log.warn("#RavenApiClientMethodInterceptor - doBody: body resolver can't resolve with method: {} " +
+                log.warn(
+                    "#RavenApiClientMethodInterceptor - doBody: body resolver can't resolve with method: {} "
+                        +
                         "and content type: {}",
                     methodName,
                     contentType);
@@ -235,12 +246,14 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return Mono.just(client);
   }
 
-  private Mono doResponse(Mono<? extends WebClient.RequestHeadersSpec<?>> client, String methodName) {
+  private Mono doResponse(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
+      String methodName) {
     Type type = metadata.getResponseBodyClasses().get(methodName);
     return handleResponseType(client, type);
   }
 
-  private Mono handleResponseType(Mono<? extends WebClient.RequestHeadersSpec<?>> client, Type type) {
+  private Mono handleResponseType(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
+      Type type) {
     if (type instanceof ParameterizedType parameterizedType) {
       return handleParameterizedType(client, parameterizedType);
     } else {
@@ -249,38 +262,44 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private Mono handleParameterizedType(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
-                                       ParameterizedType parameterizedType) {
+      ParameterizedType parameterizedType) {
     if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
       return handleResponseEntity(client, parameterizedType);
     } else {
       return client.flatMap(
-          c -> c.retrieve().bodyToMono(ParameterizedTypeReference.forType(parameterizedType.getRawType())));
+          c -> c.retrieve()
+              .bodyToMono(ParameterizedTypeReference.forType(parameterizedType.getRawType())));
     }
   }
 
   private Mono handleResponseEntity(Mono<? extends WebClient.RequestHeadersSpec<?>> client,
-                                    ParameterizedType parameterizedType) {
+      ParameterizedType parameterizedType) {
     return handleResponseSpec(getResponseEntitySpec(client), parameterizedType);
   }
 
-  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(Mono<? extends WebClient.RequestHeadersSpec<
-      ?>> client) {
+  private Mono<WebClient.ResponseSpec> getResponseEntitySpec(
+      Mono<? extends WebClient.RequestHeadersSpec<
+          ?>> client) {
     // TODO: need to update error handling
     return client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
         clientResponse -> Mono.empty()));
   }
 
-  private Mono handleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
-    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument && List.class.equals(actualTypeArgument.getRawType())) {
+  private Mono handleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec,
+      ParameterizedType parameterizedType) {
+    if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType actualTypeArgument
+        && List.class.equals(actualTypeArgument.getRawType())) {
       return handleListResponseSpec(responseSpec, actualTypeArgument);
     }
 
     Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
-    return Void.class.equals(actualTypeArgument) ? responseSpec.flatMap(WebClient.ResponseSpec::toBodilessEntity)
+    return Void.class.equals(actualTypeArgument) ? responseSpec.flatMap(
+        WebClient.ResponseSpec::toBodilessEntity)
         : handleSingleResponseSpec(responseSpec, actualTypeArgument);
   }
 
-  private Mono handleListResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, ParameterizedType parameterizedType) {
+  private Mono handleListResponseSpec(Mono<WebClient.ResponseSpec> responseSpec,
+      ParameterizedType parameterizedType) {
     return responseSpec.flatMap(respEntity -> respEntity.toEntity(
         ParameterizedTypeReference.forType(
             parameterizedType.getActualTypeArguments()[0])));
@@ -293,9 +312,10 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   private Mono doFallback(Throwable throwable, Method method, Object[] arguments) {
     if (ravenApiClientFallback.isAvailable()) {
-      return ravenApiClientFallback.invoke(method, arguments, throwable);
+      return apiErrorResolver.resolve(throwable, type, method, arguments)
+          .switchIfEmpty(ravenApiClientFallback.invoke(method, arguments, throwable));
     }
-    return Mono.error(throwable);
+    return apiErrorResolver.resolve(throwable, type, method, arguments);
   }
 
   private URI getUri(UriBuilder builder, String methodName, Object[] arguments) {

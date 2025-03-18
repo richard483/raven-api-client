@@ -32,6 +32,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 
+/**
+ * RequestMappingMetadataBuilder
+ * <p>
+ * The RequestMappingMetadataBuilder class is responsible for building the RequestMappingMetadata
+ * object by analyzing the methods of the target class.
+ * </p>
+ */
+
 @Slf4j
 public class RequestMappingMetadataBuilder {
 
@@ -208,8 +216,8 @@ public class RequestMappingMetadataBuilder {
       Class<T> parameterAnnotationClass) {
     Map<String, Integer> parameterPosition = new HashMap<>();
     for (int i = 0;
-         i < parameters.length;
-         i++) {
+        i < parameters.length;
+        i++) {
       Parameter parameter = parameters[i];
       T annotation = parameter.getAnnotation(parameterAnnotationClass);
       if (annotation != null) {
@@ -346,7 +354,8 @@ public class RequestMappingMetadataBuilder {
       case "PostMapping" -> List.of(RequestMethod.POST).toArray(new RequestMethod[0]);
       case "PatchMapping" -> List.of(RequestMethod.PATCH).toArray(new RequestMethod[0]);
       case "DeleteMapping" -> List.of(RequestMethod.DELETE).toArray(new RequestMethod[0]);
-      case "RequestMapping" -> (RequestMethod[]) annotation.getClass().getMethod("method").invoke(annotation);
+      case "RequestMapping" ->
+          (RequestMethod[]) annotation.getClass().getMethod("method").invoke(annotation);
       default -> List.of(RequestMethod.GET).toArray(new RequestMethod[0]);
     };
   }

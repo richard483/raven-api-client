@@ -5,6 +5,14 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.web.reactive.function.BodyInserter;
 import reactor.core.publisher.Mono;
 
+/**
+ * ApiBodyResolver
+ *
+ * <p>
+ * ApiBodyResolver is an interface that provides a method to resolve the body of a request.
+ * </p>
+ */
+
 public interface ApiBodyResolver {
 
   boolean canResolve(String contentType);

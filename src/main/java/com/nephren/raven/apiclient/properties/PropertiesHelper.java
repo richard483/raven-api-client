@@ -29,6 +29,10 @@ public class PropertiesHelper {
         target.setWriteTimeout(source.getWriteTimeout());
       }
 
+      if (Objects.nonNull(source.getErrorResolver())) {
+        target.setErrorResolver(source.getErrorResolver());
+      }
+
       source.getHeaders().forEach((key, value) -> target.getHeaders().put(key, value));
     }
   }

@@ -12,6 +12,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+/**
+ * RequestMappingMetadata
+ * <p>
+ * The request mapping information includes the URL path, HTTP method, headers, content type, and
+ * response content type for each method.
+ * </p>
+ */
+
 @Data
 @Builder
 @AllArgsConstructor

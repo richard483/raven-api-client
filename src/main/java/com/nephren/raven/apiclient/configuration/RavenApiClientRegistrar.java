@@ -2,7 +2,7 @@ package com.nephren.raven.apiclient.configuration;
 
 import com.nephren.raven.apiclient.annotation.RavenApiClient;
 import com.nephren.raven.apiclient.exception.RavenApiException;
-import com.nephren.raven.apiclient.interceptor.RavenApiClientMethodInterceptor;
+import com.nephren.raven.apiclient.aop.RavenApiClientMethodInterceptor;
 import com.nephren.raven.apiclient.reactor.ReactorConfiguration;
 import java.util.Arrays;
 import java.util.HashSet;
