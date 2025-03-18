@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient;
 
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,11 +8,10 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.List;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
 class RavenApiClientGetTests {
+
   private final WebTestClient webTestClient;
 
   @Autowired
@@ -42,7 +42,8 @@ class RavenApiClientGetTests {
     webTestClient.get().uri("http://localhost:8080/get/request-mapping-unsupported")
         .exchange()
         .expectStatus()
-        .is5xxServerError();
+        .isOk()
+        .expectBody().isEmpty();
   }
 
   @Test
@@ -149,11 +150,13 @@ class RavenApiClientGetTests {
 
   @Test
   void getRequestWithQueryParamCollection() {
-    webTestClient.get().uri("http://localhost:8080/get/withQueryParamAndCollection?names=Richard,Nephren,William")
+    webTestClient.get()
+        .uri("http://localhost:8080/get/withQueryParamAndCollection?names=Richard,Nephren,William")
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class).isEqualTo("Message received with names: [Richard, Nephren, William] with the length of: 3");
+        .expectBody(String.class).isEqualTo(
+            "Message received with names: [Richard, Nephren, William] with the length of: 3");
   }
 
   @Test
