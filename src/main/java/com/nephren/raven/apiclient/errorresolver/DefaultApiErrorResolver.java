@@ -1,4 +1,4 @@
-package com.nephren.raven.apiclient.error;
+package com.nephren.raven.apiclient.errorresolver;
 
 import java.lang.reflect.Method;
 import lombok.extern.slf4j.Slf4j;

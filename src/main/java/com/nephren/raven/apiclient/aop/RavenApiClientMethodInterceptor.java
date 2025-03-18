@@ -6,7 +6,7 @@ import com.nephren.raven.apiclient.aop.fallback.FallbackMetadata;
 import com.nephren.raven.apiclient.aop.fallback.FallbackMetadataBuilder;
 import com.nephren.raven.apiclient.aop.fallback.RavenApiClientFallback;
 import com.nephren.raven.apiclient.body.ApiBodyResolver;
-import com.nephren.raven.apiclient.error.ApiErrorResolver;
+import com.nephren.raven.apiclient.errorresolver.ApiErrorResolver;
 import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;

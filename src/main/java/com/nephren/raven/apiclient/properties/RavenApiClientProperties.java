@@ -1,6 +1,6 @@
 package com.nephren.raven.apiclient.properties;
 
-import com.nephren.raven.apiclient.error.ApiErrorResolver;
+import com.nephren.raven.apiclient.errorresolver.ApiErrorResolver;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;

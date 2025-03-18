@@ -1,7 +1,7 @@
 package com.nephren.raven.apiclient.annotation;
 
-import com.nephren.raven.apiclient.error.ApiErrorResolver;
-import com.nephren.raven.apiclient.error.DefaultApiErrorResolver;
+import com.nephren.raven.apiclient.errorresolver.ApiErrorResolver;
+import com.nephren.raven.apiclient.errorresolver.DefaultApiErrorResolver;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

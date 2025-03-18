@@ -3,7 +3,7 @@ package com.nephren.raven.apiclient.configuration;
 import com.nephren.raven.apiclient.body.FormBodyResolver;
 import com.nephren.raven.apiclient.body.JsonBodyResolver;
 import com.nephren.raven.apiclient.body.MultipartBodyResolver;
-import com.nephren.raven.apiclient.error.DefaultApiErrorResolver;
+import com.nephren.raven.apiclient.errorresolver.DefaultApiErrorResolver;
 import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

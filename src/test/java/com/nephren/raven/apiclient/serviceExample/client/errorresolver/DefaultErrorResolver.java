@@ -1,6 +1,6 @@
 package com.nephren.raven.apiclient.serviceExample.client.errorresolver;
 
-import com.nephren.raven.apiclient.error.ApiErrorResolver;
+import com.nephren.raven.apiclient.errorresolver.ApiErrorResolver;
 import java.lang.reflect.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
