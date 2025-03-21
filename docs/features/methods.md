@@ -18,7 +18,7 @@ request:
 - `@PatchMapping`
 - `@RequestMapping` (with `method` attribute set to the desired HTTP method)
 
-## Example
+#### Example
 
 ```java
 

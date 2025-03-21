@@ -13,7 +13,7 @@ There are several way to specify the headers to be used in the request.
 
 The `@RequestHeader` annotation from `org.springframework.web.bind.annotation` can be used to specify the headers to be used in the request.
 
-### Example
+#### Example
 
 ```java
   @GetMapping(value = "/getRequest-withHeader",
@@ -25,7 +25,7 @@ The `@RequestHeader` annotation from `org.springframework.web.bind.annotation` c
 
 The `headers` attribute of the `@RequestMapping` (or equivalent) annotation can be used to specify the headers to be used in the request. You need to specify the header name and value as a string in the format `HeaderName=HeaderValue`.
 
-### Example
+#### Example
 
 ```java
   @RequestMapping(value = "/getRequest-withHeader",
@@ -39,7 +39,7 @@ The `headers` attribute of the `@RequestMapping` (or equivalent) annotation can 
 
 You can specify the headers in the configuration (`application.properties` or `application.yml`) file. You need to specify the header name and value as a string in the format `nephren.raven.apiclient.configs.<apiClient-name>.headers.HeaderName=HeaderValue`.
 
-### Example
+#### Example
 
 ```
 nephren.raven.apiclient.configs.<apiClient-name>.headers.Content-Type=application/json
