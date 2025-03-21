@@ -33,7 +33,7 @@
 
 ### Api Client Properties
 
-```properties
+```
 # where your api client interfaces are located
 nephren.raven.apiclient.packages=com.example.apiclient
 
@@ -54,7 +54,7 @@ nephren.raven.apiclient.configs.<apiClient-name>.connect-timeout=5000
 nephren.raven.apiclient.configs.<apiClient-name>.write-timeout=5000
 
 # not required, headers for the api client, default is empty
-nephren.raven.apiclient.configs.<apiClient-name>.headers.<headers-key]=application/json
+nephren.raven.apiclient.configs.<apiClient-name>.headers.<headers-key>=application/json
 
 # not required, error resolver for the api client, default is DefaultErrorResolver
 nephren.raven.apiclient.configs.<apiClient-name>.error-resolver=com.nephren.raven.apiclient.
@@ -63,7 +63,7 @@ serviceExample.client.errorresolver.DefaultErrorResolver
 
 ### Api Scheduler
 
-```properties
+```
 # not required, customize scheduler flavors, default is immediate
 nephren.raven.reactor.helper.configs.<apiClient-name>.type=single
 
