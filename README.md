@@ -43,32 +43,34 @@ Latest & other versions:
 nephren.raven.apiclient.packages=com.example.apiclient
 
 # not required, base url for the api client, default is localhost
-nephren.raven.apiclient.configs.[apiClient-name].url=localhost:8080
+nephren.raven.apiclient.configs.<apiClient-name>.url=localhost:8080
 
 # not required, fallback class for the api client, default is null
-nephren.raven.apiclient.configs.[apiClient-name].fallback=com.nephren.raven.apiclient.serviceExample.client.fallback.ExampleClientWithFallbackOtherFallback
+nephren.raven.apiclient.configs.<apiClient-name>.fallback=com.nephren.raven.apiclient.
+serviceExample.client.fallback.ExampleClientWithFallbackOtherFallback
 
 # not required, read timeout for the api client, default is 2000
-nephren.raven.apiclient.configs.[apiClient-name].read-timeout=5000
+nephren.raven.apiclient.configs.<apiClient-name>.read-timeout=5000
 
 # not required, connect timeout for the api client, default is 2000
-nephren.raven.apiclient.configs.[apiClient-name].connect-timeout=5000
+nephren.raven.apiclient.configs.<apiClient-name>.connect-timeout=5000
 
 # not required, write timeout for the api client, default is 2000
-nephren.raven.apiclient.configs.[apiClient-name].write-timeout=5000
+nephren.raven.apiclient.configs.<apiClient-name>.write-timeout=5000
 
 # not required, headers for the api client, default is empty
-nephren.raven.apiclient.configs.[apiClient-name].headers.[headers-key]=application/json
+nephren.raven.apiclient.configs.<apiClient-name>.headers.<headers-key]=application/json
 
 # not required, error resolver for the api client, default is DefaultErrorResolver
-nephren.raven.apiclient.configs.[apiClient-name].error-resolver=com.nephren.raven.apiclient.serviceExample.client.errorresolver.DefaultErrorResolver
+nephren.raven.apiclient.configs.<apiClient-name>.error-resolver=com.nephren.raven.apiclient.
+serviceExample.client.errorresolver.DefaultErrorResolver
 ```
 
 ### Api Scheduler
 
 ```properties
 # not required, customize scheduler flavors, default is immediate
-nephren.raven.reactor.helper.configs.[apiClient-name].type=single
+nephren.raven.reactor.helper.configs.<apiClient-name>.type=single
 
 # based on the configured flavors, there were some other settings that could be customized, but all of the is not required
 nephren.raven.reactor.helper.configs.SINGLE.type=single
