@@ -21,9 +21,6 @@ request:
 #### Example
 
 ```java
-
-import org.springframework.web.bind.annotation.RequestMapping;
-
 @RavenApiClient(name = "getExampleClient")
 public interface GETExampleClient {
 
