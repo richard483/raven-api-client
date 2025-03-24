@@ -1,13 +1,13 @@
 ---
 layout: default
-title: HTTP headers
-nav_order: 2
+title: HTTP Headers
+nav_order: 3
 parent: Features
 ---
 
 # HTTP Headers
 
-There are several way to specify the headers to be used in the request.
+There are a several way to specify the headers to be used in the request.
 
 ## Using `@RequestHeader` annotation
 

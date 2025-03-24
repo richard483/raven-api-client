@@ -1,39 +1,16 @@
 ---
 layout: default
-title: Setup
+title: API Client Setup
 nav_order: 2
 has_children: false
 ---
 
 # Setup
 
-## Add new repository to your pom.xml
-
-```xml
-<repositories>
-  <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
-  </repository>
-</repositories>
-```
-
-## Add new dependency to your pom.xml
-
-```xml
-<dependency>
-    <groupId>com.github.richard483</groupId>
-    <artifactId>raven-api-client</artifactId>
-    <version>${version-tag}</version>
-</dependency>
-```
-
-## Initial Configuration
-
 ## Api Client Properties
 
 ```
-# where your api client interfaces are located
+# where your api client interfaces are located for registering api client bean(required)
 nephren.raven.apiclient.packages=com.example.apiclient
 
 # not required, base url for the api client, default is localhost

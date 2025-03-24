@@ -1,11 +1,11 @@
 ---
 layout: default
 title: HTTP Methods
-nav_order: 1
+nav_order: 2
 parent: Features
 ---
 
-# Http Methods
+# HTTP Methods
 
 The client interface can be annotated with the following annotations to specify the HTTP method to
 be used for the
