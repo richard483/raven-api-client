@@ -14,7 +14,9 @@ by [Blibli Backend Framework's API Client](https://github.com/bliblidotcom/blibl
 - Java 21+
 - Spring 3.3+
 - Maven 3.6.3+
+
 ## Import to your project
+
 ### Add new repository to your pom.xml
 
 ```xml
