@@ -1,13 +1,21 @@
-# Raven API Client
+---
+layout: default
+title: Home
+nav_order: 1
+has_children: false
+---
 
-This is a Spring Boot Reactive Web Client library insired
+# Getting Started
+Raven Api Client is a Spring Boot Reactive Web Client library insired
 by [Blibli Backend Framework's API Client](https://github.com/bliblidotcom/blibli-backend-framework/tree/master/blibli-backend-framework-api-client).
 
-## How to implement Raven API Client in your Spring Boot project
+## Prerequisites
 
-Java : 21+
+- Java 21+
+- Spring 3.3+
+- Maven 3.6.3+
 
-Spring : 3.3+
+## Import to your project
 
 ### Add new repository to your pom.xml
 
@@ -33,5 +41,3 @@ Spring : 3.3+
 Latest & other versions:
 
 [![](https://jitpack.io/v/richard483/raven-api-client.svg)](https://jitpack.io/#richard483/raven-api-client)
-
-For documentation and examples, please visit the [github.io page](https://richard483.github.io/raven-api-client/)

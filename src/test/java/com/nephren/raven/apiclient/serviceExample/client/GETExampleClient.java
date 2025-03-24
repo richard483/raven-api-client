@@ -1,6 +1,7 @@
 package com.nephren.raven.apiclient.serviceExample.client;
 
 import com.nephren.raven.apiclient.annotation.RavenApiClient;
+import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @RavenApiClient(name = "getExampleClient")
 public interface GETExampleClient {
@@ -43,6 +42,11 @@ public interface GETExampleClient {
   @GetMapping(value = "/getRequest-withHeader",
       produces = MediaType.APPLICATION_JSON_VALUE, headers = {"X-Test-Header=Hola!"})
   Mono<ResponseEntity<String>> getRequestWithHeader2();
+
+  @RequestMapping(value = "/getRequest-withHeader",
+      produces = MediaType.APPLICATION_JSON_VALUE, headers = {
+      "X-Test-Header=Hola!"}, method = RequestMethod.GET)
+  Mono<ResponseEntity<String>> getRequestWithHeader2WithRequestMapping();
 
   @GetMapping(value = "/getRequest-withHeader",
       produces = MediaType.APPLICATION_JSON_VALUE, headers = {"X-Test-Header"})

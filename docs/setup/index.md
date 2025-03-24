@@ -1,23 +1,50 @@
-server.port=8080
-nephren.raven.apiclient.configs.getExampleClient.url=http://localhost:8080
-nephren.raven.apiclient.configs.postExampleClient.url=http://localhost:8080
-nephren.raven.apiclient.configs.postExampleClient.error-resolver=com.nephren.raven.apiclient.serviceExample.client.errorresolver.DefaultErrorResolver
-nephren.raven.apiclient.configs.postExampleClient.headers.Content-Type=application/json
-nephren.raven.apiclient.configs.putExampleClient.url=http://localhost:8080
-nephren.raven.apiclient.configs.patchExampleClient.url=http://localhost:8080
-nephren.raven.apiclient.configs.deleteExampleClient.url=http://localhost:8080
-nephren.raven.apiclient.configs.deleteExampleClient.fallback=com.nephren.raven.apiclient.serviceExample.client.fallback.ExampleClientWithFallbackOtherFallback
-#fallback url
-nephren.raven.apiclient.configs.exampleClientWithFallback.url=http://localhost:8081
-nephren.raven.apiclient.configs.exampleClientWithOtherFallback.url=http://localhost:8081
-nephren.raven.apiclient.configs.deleteExampleClientError.url=http://localhost:8081
-nephren.raven.apiclient.packages=com.nephren.raven.apiclient.serviceExample.client
-spring.mvc.log-request-details=true
-logging.level.org.springframework.web.reactive.function.client.ExchangeFunctions=TRACE
-logging.level.reactor.netty.http.client=DEBUG
-#scheduler
+---
+layout: default
+title: API Client Setup
+nav_order: 2
+has_children: false
+---
+
+# Setup
+
+## Api Client Properties
+
+```
+# where your api client interfaces are located for registering api client bean(required)
+nephren.raven.apiclient.packages=com.example.apiclient
+
+# not required, base url for the api client, default is localhost
+nephren.raven.apiclient.configs.<apiClient-name>.url=localhost:8080
+
+# not required, fallback class for the api client, default is null
+nephren.raven.apiclient.configs.<apiClient-name>.fallback=com.nephren.raven.apiclient.
+serviceExample.client.fallback.ExampleClientWithFallbackOtherFallback
+
+# not required, read timeout for the api client, default is 2000
+nephren.raven.apiclient.configs.<apiClient-name>.read-timeout=5000
+
+# not required, connect timeout for the api client, default is 2000
+nephren.raven.apiclient.configs.<apiClient-name>.connect-timeout=5000
+
+# not required, write timeout for the api client, default is 2000
+nephren.raven.apiclient.configs.<apiClient-name>.write-timeout=5000
+
+# not required, headers for the api client, default is empty
+nephren.raven.apiclient.configs.<apiClient-name>.headers.<headers-key>=application/json
+
+# not required, error resolver for the api client, default is DefaultErrorResolver
+nephren.raven.apiclient.configs.<apiClient-name>.error-resolver=com.nephren.raven.apiclient.
+serviceExample.client.errorresolver.DefaultErrorResolver
+```
+
+## Api Scheduler
+
+```
+# not required, customize scheduler flavors, default is immediate
+nephren.raven.reactor.helper.configs.<apiClient-name>.type=single
+
+# based on the configured flavors, there were some other settings that could be customized, but all of the is not required
 nephren.raven.reactor.helper.configs.SINGLE.type=single
-nephren.raven.reactor.helper.configs.deleteExampleClient.type=single
 nephren.raven.reactor.helper.configs.PARALLEL.type=parallel
 nephren.raven.reactor.helper.configs.IMMEDIATE.type=immediate
 nephren.raven.reactor.helper.configs.NEW_SINGLE.type=new_single
@@ -50,4 +77,4 @@ nephren.raven.reactor.helper.configs.THREAD_POOL.thread-pool.maximum-pool-size=1
 nephren.raven.reactor.helper.configs.THREAD_POOL.thread-pool.queue-type=linked
 nephren.raven.reactor.helper.configs.THREAD_POOL.thread-pool.queue-size=100
 nephren.raven.reactor.helper.configs.THREAD_POOL.thread-pool.allow-core-thread-time-out=true
-spring.output.ansi.enabled=ALWAYS
+```
