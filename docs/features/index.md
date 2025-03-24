@@ -5,8 +5,6 @@ nav_order: 3
 has_children: true
 ---
 
-# Import
-
 ## Import to your project
 ### Add new repository to your pom.xml
 
