@@ -30,3 +30,5 @@ has_children: true
 Latest & other versions:
 
 [![](https://jitpack.io/v/richard483/raven-api-client.svg)](https://jitpack.io/#richard483/raven-api-client)
+
+[more features](https://richard483.github.io/raven-api-client/features/)

@@ -9,8 +9,6 @@ parent: Features
 
 Like the usual Spring Web annotations, you can use the `@PathVariable` annotation to specify the path variables to be used in the request.
 
-#### Example
-
 ```java
     @GetMapping(value = "/getRequest-withPathVariable/{testPathVariable}",
         produces = MediaType.APPLICATION_JSON_VALUE)
