@@ -9,8 +9,6 @@ parent: Features
 
 Like the usual Spring Web annotations, you can use the `@RequestParam` annotation to specify the query parameters to be used in the request.
 
-#### Example
-
 ```java
     @GetMapping(value = "/getRequest-withQueryParam",
         produces = MediaType.APPLICATION_JSON_VALUE)

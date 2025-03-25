@@ -18,8 +18,6 @@ request:
 - `@PatchMapping`
 - `@RequestMapping` (with `method` attribute set to the desired HTTP method)
 
-#### Example
-
 ```java
 @RavenApiClient(name = "getExampleClient")
 public interface GETExampleClient {

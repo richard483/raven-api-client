@@ -11,8 +11,6 @@ Like on the Feign library, API client interface is the interface that defines th
 will be 
 used to make the requests to the API. The interface can be annotated with the `@RavenApiClient` annotation to specify the name of the client. The client name is used to identify the client when creating the client instance.
 
-## Example
-
 ```java
 @RavenApiClient(name = "exampleClient")
 public interface ExampleClient {
