@@ -131,8 +131,6 @@ public class RequestMappingMetadataBuilder {
     methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(type))
         .filter(method -> getRequestMappingAnnotation(method) != null)
         .collect(Collectors.toMap(java.lang.reflect.Method::getName, method -> method));
-    // TODO:
-    // check if this is correct, because it different from the reference code
   }
 
   private void prepareHeaders() {
