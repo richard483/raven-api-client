@@ -280,7 +280,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   private Mono<WebClient.ResponseSpec> getResponseEntitySpec(
       Mono<? extends WebClient.RequestHeadersSpec<
           ?>> client) {
-    // TODO: need to update error handling
     return client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
         clientResponse -> Mono.empty()));
   }
