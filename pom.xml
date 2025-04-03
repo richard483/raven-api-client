@@ -98,7 +98,7 @@
     <artifactId>spring-boot-starter-parent</artifactId>
     <groupId>org.springframework.boot</groupId>
     <relativePath/>
-    <version>3.3.2</version> <!-- lookup parent from repository -->
+    <version>2.7.18</version> <!-- lookup parent from repository -->
   </parent>
   <properties>
     <java.version>21</java.version>
@@ -112,5 +112,5 @@
   </scm>
 
   <url>https://github.com/richard483/raven-api-client</url>
-  <version>0.1.1</version>
+  <version>0.1.1-s2</version>
 </project>

@@ -31,7 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -280,7 +280,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   private Mono<WebClient.ResponseSpec> getResponseEntitySpec(
       Mono<? extends WebClient.RequestHeadersSpec<
           ?>> client) {
-    return client.map(spec -> spec.retrieve().onStatus(HttpStatusCode::isError,
+    return client.map(spec -> spec.retrieve().onStatus(HttpStatus::isError,
         clientResponse -> Mono.empty()));
   }
 
