@@ -37,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -167,10 +168,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     String methodName = method.getName();
     Object[] args = invocation.getArguments();
     if (!metadata.getRequestMethods().containsKey(methodName)) {
-      return Mono.error(new UnsupportedOperationException(
-          "#RavenApiClientMethodInterceptor method '" + methodName + "' on " + type.getName()
-              + " has no @GetMapping/@PostMapping/@PutMapping/@PatchMapping/@DeleteMapping/"
-              + "@RequestMapping annotation"));
+      return handleUnmappedMethod(method, args);
     }
     Mono mono = Mono.fromCallable(() -> webClient)
         .map(client -> doMethod(methodName))
@@ -183,6 +181,20 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       return mono.subscribeOn(scheduler);
     }
     return mono;
+  }
+
+  private Object handleUnmappedMethod(Method method, Object[] args) {
+    if (method.getDeclaringClass() == Object.class) {
+      return ReflectionUtils.invokeMethod(method, this, args);
+    }
+    UnsupportedOperationException ex = new UnsupportedOperationException(
+        "#RavenApiClientMethodInterceptor method '" + method.getName() + "' on " + type.getName()
+            + " has no @GetMapping/@PostMapping/@PutMapping/@PatchMapping/@DeleteMapping/"
+            + "@RequestMapping annotation");
+    if (Mono.class.isAssignableFrom(method.getReturnType())) {
+      return Mono.error(ex);
+    }
+    throw ex;
   }
 
   private WebClient.RequestHeadersUriSpec<?> doMethod(String methodName) {
