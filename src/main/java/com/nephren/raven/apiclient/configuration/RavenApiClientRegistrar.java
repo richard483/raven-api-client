@@ -94,8 +94,7 @@ public class RavenApiClientRegistrar
     AnnotationMetadata annotationMetadata = beanDefinition.getMetadata();
     if (!annotationMetadata.isInterface()) {
       throw new RavenApiException(
-          "#RavenApiClientRegistrar - @RavenApiClient can only be specified on an interface",
-          null);
+          "#RavenApiClientRegistrar - @RavenApiClient can only be specified on an interface");
     }
 
     Map<String, Object> attributes =
@@ -112,7 +111,7 @@ public class RavenApiClientRegistrar
       return name;
     }
     throw new RavenApiException(
-        "#RavenApiClientRegistrar 'name' must be provided in @RavenApiClient", null);
+        "#RavenApiClientRegistrar 'name' must be provided in @RavenApiClient");
   }
 
   private void registerApiClientInterceptor(

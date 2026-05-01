@@ -166,6 +166,12 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     Method method = invocation.getMethod();
     String methodName = method.getName();
     Object[] args = invocation.getArguments();
+    if (!metadata.getRequestMethods().containsKey(methodName)) {
+      return Mono.error(new UnsupportedOperationException(
+          "#RavenApiClientMethodInterceptor method '" + methodName + "' on " + type.getName()
+              + " has no @GetMapping/@PostMapping/@PutMapping/@PatchMapping/@DeleteMapping/"
+              + "@RequestMapping annotation"));
+    }
     Mono mono = Mono.fromCallable(() -> webClient)
         .map(client -> doMethod(methodName))
         .map(client -> getUriBuilder(methodName, args, client))
@@ -314,7 +320,8 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       return apiErrorResolver.resolve(throwable, type, method, arguments)
           .switchIfEmpty(ravenApiClientFallback.invoke(method, arguments, throwable));
     }
-    return apiErrorResolver.resolve(throwable, type, method, arguments);
+    return apiErrorResolver.resolve(throwable, type, method, arguments)
+        .switchIfEmpty(Mono.error(throwable));
   }
 
   private URI getUri(UriBuilder builder, String methodName, Object[] arguments) {

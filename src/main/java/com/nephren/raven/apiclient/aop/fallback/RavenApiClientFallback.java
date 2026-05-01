@@ -19,22 +19,38 @@ public class RavenApiClientFallback {
     return Mono.just(throwable)
         .flatMap(exception -> {
           if (method.getDeclaringClass().isAssignableFrom(fallback.getClass())) {
-            return (Mono) ReflectionUtils.invokeMethod(method, fallback, arguments);
+            return asMono(ReflectionUtils.invokeMethod(method, fallback, arguments), method);
           }
 
           Method methodWithException = fallbackMetadata.exceptionMethods().get(method);
           if (methodWithException != null) {
             Object[] target = getArgumentsWithException(arguments, exception);
-            return (Mono) ReflectionUtils.invokeMethod(methodWithException, fallback, target);
+            return asMono(
+                ReflectionUtils.invokeMethod(methodWithException, fallback, target),
+                methodWithException);
           }
 
           Method fallbackMethod = fallbackMetadata.methods().get(method);
           if (fallbackMethod != null) {
-            return (Mono) ReflectionUtils.invokeMethod(fallbackMethod, fallback, arguments);
+            return asMono(
+                ReflectionUtils.invokeMethod(fallbackMethod, fallback, arguments), fallbackMethod);
           }
 
           return Mono.error(exception);
         });
+  }
+
+  private static Mono<?> asMono(Object result, Method invoked) {
+    if (result == null) {
+      return Mono.empty();
+    }
+    if (result instanceof Mono<?> mono) {
+      return mono;
+    }
+    return Mono.error(new IllegalStateException(
+        "#RavenApiClientFallback fallback method '" + invoked.getName()
+            + "' must return reactor.core.publisher.Mono, got "
+            + result.getClass().getName()));
   }
 
   private Object[] getArgumentsWithException(Object[] arguments, Throwable exception) {
