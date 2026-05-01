@@ -41,16 +41,13 @@ public class RavenApiClientFallback {
   }
 
   private static Mono<?> asMono(Object result, Method invoked) {
-    if (result == null) {
-      return Mono.empty();
-    }
     if (result instanceof Mono<?> mono) {
       return mono;
     }
+    String got = result == null ? "null" : result.getClass().getName();
     return Mono.error(new IllegalStateException(
         "#RavenApiClientFallback fallback method '" + invoked.getName()
-            + "' must return reactor.core.publisher.Mono, got "
-            + result.getClass().getName()));
+            + "' must return reactor.core.publisher.Mono, got " + got));
   }
 
   private Object[] getArgumentsWithException(Object[] arguments, Throwable exception) {

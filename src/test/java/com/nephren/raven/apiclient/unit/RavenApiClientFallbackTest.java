@@ -29,6 +29,13 @@ public class RavenApiClientFallbackTest {
     }
   }
 
+  public static class NullFallback implements Api {
+    @Override
+    public Mono<String> call() {
+      return null;
+    }
+  }
+
   @Test
   void invoke_withDirectImplementingFallback_returnsFallbackMono() throws Exception {
     Method method = Api.class.getMethod("call");
@@ -54,6 +61,19 @@ public class RavenApiClientFallbackTest {
         .build();
 
     StepVerifier.create(fallback.invoke(apiMethod, new Object[0], new RuntimeException("boom")))
+        .expectError(IllegalStateException.class)
+        .verify();
+  }
+
+  @Test
+  void invoke_whenFallbackMethodReturnsNull_emitsIllegalStateException() throws Exception {
+    Method method = Api.class.getMethod("call");
+    RavenApiClientFallback fallback = RavenApiClientFallback.builder()
+        .fallback(new NullFallback())
+        .fallbackMetadata(new FallbackMetadata(Collections.emptyMap(), Collections.emptyMap()))
+        .build();
+
+    StepVerifier.create(fallback.invoke(method, new Object[0], new RuntimeException("boom")))
         .expectError(IllegalStateException.class)
         .verify();
   }
