@@ -82,4 +82,8 @@ public interface GETExampleClient {
   @GetMapping(value = "/getRequest-listWithoutResponseEntity")
   Mono<List<String>> getRequestListWithoutResponseEntity();
 
+  @GetMapping(value = "/getRequest-ISE",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<String> getRequestISEWithoutResponseEntity();
+
 }

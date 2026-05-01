@@ -26,6 +26,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -37,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -166,6 +168,9 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     Method method = invocation.getMethod();
     String methodName = method.getName();
     Object[] args = invocation.getArguments();
+    if (!metadata.getRequestMethods().containsKey(methodName)) {
+      return handleUnmappedMethod(invocation);
+    }
     Mono mono = Mono.fromCallable(() -> webClient)
         .map(client -> doMethod(methodName))
         .map(client -> getUriBuilder(methodName, args, client))
@@ -177,6 +182,32 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       return mono.subscribeOn(scheduler);
     }
     return mono;
+  }
+
+  private Object handleUnmappedMethod(MethodInvocation invocation) {
+    Method method = invocation.getMethod();
+    if (method.getDeclaringClass() == Object.class) {
+      Object proxy = invocation instanceof ProxyMethodInvocation pmi ? pmi.getProxy() : null;
+      return invokeProxyObjectMethod(method, invocation.getArguments(), proxy);
+    }
+    UnsupportedOperationException ex = new UnsupportedOperationException(
+        "#RavenApiClientMethodInterceptor method '" + method.getName() + "' on " + type.getName()
+            + " has no @GetMapping/@PostMapping/@PutMapping/@PatchMapping/@DeleteMapping/"
+            + "@RequestMapping annotation");
+    if (Mono.class.isAssignableFrom(method.getReturnType())) {
+      return Mono.error(ex);
+    }
+    throw ex;
+  }
+
+  private Object invokeProxyObjectMethod(Method method, Object[] args, Object proxy) {
+    return switch (method.getName()) {
+      case "equals" -> proxy != null && proxy == args[0];
+      case "hashCode" -> System.identityHashCode(proxy != null ? proxy : this);
+      case "toString" -> type.getName() + "@"
+          + Integer.toHexString(System.identityHashCode(proxy != null ? proxy : this));
+      default -> ReflectionUtils.invokeMethod(method, proxy != null ? proxy : this, args);
+    };
   }
 
   private WebClient.RequestHeadersUriSpec<?> doMethod(String methodName) {
@@ -314,7 +345,8 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       return apiErrorResolver.resolve(throwable, type, method, arguments)
           .switchIfEmpty(ravenApiClientFallback.invoke(method, arguments, throwable));
     }
-    return apiErrorResolver.resolve(throwable, type, method, arguments);
+    return apiErrorResolver.resolve(throwable, type, method, arguments)
+        .switchIfEmpty(Mono.error(throwable));
   }
 
   private URI getUri(UriBuilder builder, String methodName, Object[] arguments) {

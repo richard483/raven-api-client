@@ -31,7 +31,7 @@ public class SchedulerHelperFactoryBean implements FactoryBean<SchedulerHelper> 
   }
   @Override
   public Class<?> getObjectType() {
-    return null;
+    return SchedulerHelper.class;
   }
   private Scheduler createScheduler(SchedulerProperties.SchedulerItemProperties properties) {
     switch (properties.getType()) {

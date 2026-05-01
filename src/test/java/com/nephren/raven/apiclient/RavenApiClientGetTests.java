@@ -42,8 +42,10 @@ class RavenApiClientGetTests {
     webTestClient.get().uri("http://localhost:8080/get/request-mapping-unsupported")
         .exchange()
         .expectStatus()
-        .isOk()
-        .expectBody().isEmpty();
+        .is5xxServerError()
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.path").isEqualTo("/get/request-mapping-unsupported");
   }
 
   @Test

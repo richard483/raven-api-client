@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient.aop;
 
+import com.nephren.raven.apiclient.exception.RavenApiException;
 import com.nephren.raven.apiclient.properties.PropertiesHelper;
 import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
 import java.lang.annotation.Annotation;
@@ -236,9 +237,9 @@ public class RequestMappingMetadataBuilder {
       paramValue =
           annotation.getClass().getMethod("value").invoke(annotation).toString();
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      log.warn("#RavenApiClient RequestMappingMetadataBuilder mapping parameter to map got "
-          + "error trace: ");
-      e.printStackTrace();
+      throw new RavenApiException(
+          "#RavenApiClient RequestMappingMetadataBuilder failed to read parameter name from "
+              + "annotation " + annotation.annotationType().getName(), e);
     }
     return paramName.isEmpty() ? paramValue : paramName;
   }
@@ -339,10 +340,10 @@ public class RequestMappingMetadataBuilder {
           .method(requestMethod)
           .build();
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      log.error("#RavenApiClient getAnnotation got error trace: ");
-      e.printStackTrace();
+      throw new RavenApiException(
+          "#RavenApiClient getAnnotation failed to read attributes from "
+              + annotationType.getName() + " on method " + method.getName(), e);
     }
-    return null;
   }
 
   private <T extends Annotation> RequestMethod[] getRequestMethod(T annotation,

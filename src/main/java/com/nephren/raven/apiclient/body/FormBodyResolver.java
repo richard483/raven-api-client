@@ -29,7 +29,15 @@ public class FormBodyResolver implements ApiBodyResolver {
       RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
       if (requestBody != null && arguments[i] != null) {
         log.debug("#FormBodyResolver - adding form body with value {}", arguments[i]);
-        return Mono.just(BodyInserters.fromFormData((MultiValueMap<String, String>) arguments[i]));
+        if (!(arguments[i] instanceof MultiValueMap)) {
+          return Mono.error(new IllegalArgumentException(
+              "#FormBodyResolver - @RequestBody parameter '" + parameter.getName()
+                  + "' for application/x-www-form-urlencoded must be a MultiValueMap<String,"
+                  + " String>, got " + arguments[i].getClass().getName()));
+        }
+        @SuppressWarnings("unchecked")
+        MultiValueMap<String, String> formData = (MultiValueMap<String, String>) arguments[i];
+        return Mono.just(BodyInserters.fromFormData(formData));
       }
     }
     return Mono.empty();

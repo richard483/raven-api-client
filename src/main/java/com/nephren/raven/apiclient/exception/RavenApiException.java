@@ -1,7 +1,5 @@
 package com.nephren.raven.apiclient.exception;
 
-import lombok.AllArgsConstructor;
-
 /**
  * RavenApiException
  *
@@ -11,10 +9,14 @@ import lombok.AllArgsConstructor;
  * </p>
  */
 
-@AllArgsConstructor
 public class RavenApiException extends RuntimeException {
 
-  private final String message;
-  private final Throwable cause;
+  public RavenApiException(String message) {
+    super(message);
+  }
+
+  public RavenApiException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
 }
