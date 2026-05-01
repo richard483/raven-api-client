@@ -31,7 +31,7 @@ class RavenApiClientErrorPropagationTests {
 
   @Test
   void monoReturn_noFallback_defaultResolver_propagatesUpstreamError() {
-    StepVerifier.create(getClientService.getRequestIseWithoutResponseEntity())
+    StepVerifier.create(getClientService.getRequestISEWithoutResponseEntity())
         .expectError(WebClientResponseException.InternalServerError.class)
         .verify();
   }

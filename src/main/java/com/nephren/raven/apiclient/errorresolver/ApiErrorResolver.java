@@ -6,12 +6,9 @@ import reactor.core.publisher.Mono;
 /**
  * ApiErrorResolver
  *
- * <p>
- * Interface for resolving errors that occur during API calls using the RavenApiClient.
- * </p>
+ * <p>Interface for resolving errors that occur during API calls using the RavenApiClient.
  *
- * <p>
- * Contract for the returned {@link Mono}:
+ * <p>Contract for the returned {@link Mono}:
  * <ul>
  *   <li>{@code Mono.just(value)} — error is considered resolved; {@code value} is returned to
  *       the caller and any configured fallback is skipped.</li>
@@ -21,7 +18,6 @@ import reactor.core.publisher.Mono;
  *   <li>{@code Mono.error(throwable)} — error is propagated as-is to the caller. Fallback is
  *       not invoked.</li>
  * </ul>
- * </p>
  */
 
 public interface ApiErrorResolver {

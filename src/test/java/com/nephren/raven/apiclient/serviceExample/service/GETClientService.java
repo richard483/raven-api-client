@@ -112,8 +112,8 @@ public class GETClientService {
     return getExampleClient.getRequestListWithoutResponseEntity();
   }
 
-  public Mono<String> getRequestIseWithoutResponseEntity() {
-    return getExampleClient.getRequestIseWithoutResponseEntity();
+  public Mono<String> getRequestISEWithoutResponseEntity() {
+    return getExampleClient.getRequestISEWithoutResponseEntity();
   }
 
 }
