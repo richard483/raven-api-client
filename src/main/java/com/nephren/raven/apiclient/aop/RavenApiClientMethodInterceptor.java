@@ -26,6 +26,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -168,7 +169,7 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     String methodName = method.getName();
     Object[] args = invocation.getArguments();
     if (!metadata.getRequestMethods().containsKey(methodName)) {
-      return handleUnmappedMethod(method, args);
+      return handleUnmappedMethod(invocation);
     }
     Mono mono = Mono.fromCallable(() -> webClient)
         .map(client -> doMethod(methodName))
@@ -183,9 +184,11 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     return mono;
   }
 
-  private Object handleUnmappedMethod(Method method, Object[] args) {
+  private Object handleUnmappedMethod(MethodInvocation invocation) {
+    Method method = invocation.getMethod();
     if (method.getDeclaringClass() == Object.class) {
-      return ReflectionUtils.invokeMethod(method, this, args);
+      Object proxy = invocation instanceof ProxyMethodInvocation pmi ? pmi.getProxy() : null;
+      return invokeProxyObjectMethod(method, invocation.getArguments(), proxy);
     }
     UnsupportedOperationException ex = new UnsupportedOperationException(
         "#RavenApiClientMethodInterceptor method '" + method.getName() + "' on " + type.getName()
@@ -195,6 +198,16 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
       return Mono.error(ex);
     }
     throw ex;
+  }
+
+  private Object invokeProxyObjectMethod(Method method, Object[] args, Object proxy) {
+    return switch (method.getName()) {
+      case "equals" -> proxy != null && proxy == args[0];
+      case "hashCode" -> System.identityHashCode(proxy != null ? proxy : this);
+      case "toString" -> type.getName() + "@"
+          + Integer.toHexString(System.identityHashCode(proxy != null ? proxy : this));
+      default -> ReflectionUtils.invokeMethod(method, proxy != null ? proxy : this, args);
+    };
   }
 
   private WebClient.RequestHeadersUriSpec<?> doMethod(String methodName) {
