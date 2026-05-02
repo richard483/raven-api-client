@@ -27,10 +27,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 
 /**
- * Locks in the {@link MergedAnnotations}-based metadata resolution introduced in tier 2 B2:
- * meta-annotated shortcuts ({@code @GetMapping} et al.) must yield the same merged
- * {@code @RequestMapping} attributes as a directly declared {@code @RequestMapping}, and
- * parameter annotations with {@code @AliasFor("name") value} must resolve via either alias.
+ * Locks in the {@link org.springframework.core.annotation.MergedAnnotations}-based metadata
+ * resolution introduced in tier 2 B2: meta-annotated shortcuts ({@code @GetMapping} et al.)
+ * must yield the same merged {@code @RequestMapping} attributes as a directly declared
+ * {@code @RequestMapping}, and parameter annotations with {@code @AliasFor("name") value} must
+ * resolve via either alias.
  */
 class RequestMappingMetadataBuilderTest {
 
