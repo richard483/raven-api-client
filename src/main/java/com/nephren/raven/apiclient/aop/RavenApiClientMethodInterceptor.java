@@ -7,10 +7,8 @@ import com.nephren.raven.apiclient.aop.fallback.FallbackMetadataBuilder;
 import com.nephren.raven.apiclient.aop.fallback.RavenApiClientFallback;
 import com.nephren.raven.apiclient.body.ApiBodyResolver;
 import com.nephren.raven.apiclient.errorresolver.ApiErrorResolver;
+import com.nephren.raven.apiclient.http.RavenHttpClientFactory;
 import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
-import io.netty.channel.ChannelOption;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -21,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -46,7 +43,6 @@ import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.netty.http.client.HttpClient;
 
 @Slf4j
 public class RavenApiClientMethodInterceptor implements InitializingBean, MethodInterceptor,
@@ -92,9 +88,15 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private void prepareWebClient() {
+    RavenHttpClientFactory factory = applicationContext.getBean(RavenHttpClientFactory.class);
+    String poolKey = RavenHttpClientFactory.poolKeyFor(name, metadata.getProperties());
+    RavenHttpClientFactory.ConfigTimeouts timeouts = new RavenHttpClientFactory.ConfigTimeouts(
+        metadata.getProperties().getConnectTimeout(),
+        metadata.getProperties().getReadTimeout(),
+        metadata.getProperties().getWriteTimeout());
     WebClient.Builder builder = applicationContext.getBean(WebClient.Builder.class)
         .exchangeStrategies(getExchangeStrategies()).baseUrl(metadata.getProperties().getUrl())
-        .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
+        .clientConnector(new ReactorClientHttpConnector(factory.httpClient(poolKey, timeouts)))
         .defaultHeaders(
             httpHeaders -> metadata.getProperties().getHeaders().forEach(httpHeaders::add));
     webClient = builder.build();
@@ -147,20 +149,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
           .jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON));
 
     }).build();
-  }
-
-  private HttpClient getHttpClient() {
-    return HttpClient.create().option(
-            ChannelOption.CONNECT_TIMEOUT_MILLIS,
-            (int) metadata.getProperties().getConnectTimeout().toMillis())
-        .doOnConnected(connection -> connection
-            .addHandlerLast(
-                new ReadTimeoutHandler(metadata.getProperties().getReadTimeout().toMillis(),
-                    TimeUnit.MILLISECONDS))
-            .addHandlerLast(
-                new WriteTimeoutHandler(metadata.getProperties().getWriteTimeout().toMillis(),
-                    TimeUnit.MILLISECONDS))
-        );
   }
 
   @Override

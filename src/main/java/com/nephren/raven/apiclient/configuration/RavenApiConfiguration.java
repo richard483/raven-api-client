@@ -4,7 +4,10 @@ import com.nephren.raven.apiclient.body.FormBodyResolver;
 import com.nephren.raven.apiclient.body.JsonBodyResolver;
 import com.nephren.raven.apiclient.body.MultipartBodyResolver;
 import com.nephren.raven.apiclient.errorresolver.DefaultApiErrorResolver;
+import com.nephren.raven.apiclient.http.DefaultRavenHttpClientFactory;
+import com.nephren.raven.apiclient.http.RavenHttpClientFactory;
 import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
+import com.nephren.raven.apiclient.properties.RavenSharedPoolProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +17,8 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(RavenApiClientRegistrar.class)
 @EnableConfigurationProperties({
-    RavenApiClientProperties.class
+    RavenApiClientProperties.class,
+    RavenSharedPoolProperties.class
 })
 public class RavenApiConfiguration {
 
@@ -40,6 +44,13 @@ public class RavenApiConfiguration {
   @ConditionalOnMissingBean
   public DefaultApiErrorResolver defaultApiErrorResolver() {
     return new DefaultApiErrorResolver();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public RavenHttpClientFactory ravenHttpClientFactory(
+      RavenSharedPoolProperties sharedPoolProperties) {
+    return new DefaultRavenHttpClientFactory(sharedPoolProperties);
   }
 
 }

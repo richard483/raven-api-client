@@ -49,6 +49,15 @@ public class RavenApiClientProperties {
     private Map<String, String> headers = new HashMap<>();
 
     private Class<? extends ApiErrorResolver> errorResolver;
+
+    /**
+     * When {@code true}, this client gets its own Reactor Netty {@code HttpClient} (and hence
+     * its own connection pool and event loops) instead of sharing the pool keyed by
+     * scheme+host:port. Default is {@code false} — most callers benefit from sharing. Set to
+     * {@code true} when this client has materially different timeout/TLS/proxy needs from
+     * other clients targeting the same host, or when its load profile would starve them.
+     */
+    private boolean isolatePool = false;
   }
 
 }
