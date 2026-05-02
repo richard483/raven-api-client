@@ -91,8 +91,9 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   private void prepareWebClient() {
     RavenHttpClientFactory factory = applicationContext.getBean(RavenHttpClientFactory.class);
     HttpClient httpClient = factory.httpClient(name, metadata.getProperties());
+    String baseUrl = RavenHttpClientFactory.normalizedBaseUrl(metadata.getProperties().getUrl());
     WebClient.Builder builder = applicationContext.getBean(WebClient.Builder.class)
-        .exchangeStrategies(getExchangeStrategies()).baseUrl(metadata.getProperties().getUrl())
+        .exchangeStrategies(getExchangeStrategies()).baseUrl(baseUrl)
         .clientConnector(new ReactorClientHttpConnector(httpClient))
         .defaultHeaders(
             httpHeaders -> metadata.getProperties().getHeaders().forEach(httpHeaders::add));

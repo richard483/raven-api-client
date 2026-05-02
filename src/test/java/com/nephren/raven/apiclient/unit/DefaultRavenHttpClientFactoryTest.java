@@ -161,6 +161,36 @@ class DefaultRavenHttpClientFactoryTest {
   }
 
   @Test
+  void httpClient_rejectsNullReadTimeout() {
+    RavenApiClientProperties.ApiClientConfigProperties bad = config("http://example.com");
+    bad.setReadTimeout(null);
+
+    Assertions.assertThatThrownBy(() -> factory.httpClient("client", bad))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("readTimeout").hasMessageContaining("null");
+  }
+
+  @Test
+  void httpClient_rejectsNonPositiveTimeout() {
+    RavenApiClientProperties.ApiClientConfigProperties bad =
+        config("http://example.com", 2000, 0, 2000);
+
+    Assertions.assertThatThrownBy(() -> factory.httpClient("client", bad))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("readTimeout").hasMessageContaining("> 0ms");
+  }
+
+  @Test
+  void httpClient_rejectsTimeoutExceedingIntRange() {
+    RavenApiClientProperties.ApiClientConfigProperties bad = config("http://example.com");
+    bad.setConnectTimeout(Duration.ofMillis(((long) Integer.MAX_VALUE) + 1));
+
+    Assertions.assertThatThrownBy(() -> factory.httpClient("client", bad))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("connectTimeout").hasMessageContaining("supported range");
+  }
+
+  @Test
   void destroy_clearsAllCachedState() {
     factory.httpClient("a", config("http://host-a:80", 2000, 2000, 2000));
     RavenApiClientProperties.ApiClientConfigProperties iso = config("http://shared:80");

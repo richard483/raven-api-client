@@ -29,9 +29,14 @@ public class RavenSharedPoolProperties {
   private int maxConnections = 500;
 
   /**
-   * Maximum number of acquire attempts allowed to queue while the pool is saturated. {@code -1}
-   * means unbounded (Reactor Netty default). Set a positive value to fail-fast under load
-   * instead of letting backpressure pile up.
+   * Maximum number of acquire attempts allowed to queue while the pool is saturated. The
+   * default of {@code -1} is a sentinel meaning "use Reactor Netty's library default", which
+   * is {@code 2 * maxConnections}. Set a positive value to override (e.g. fail-fast under
+   * load with a small queue, or raise the ceiling for very bursty workloads).
+   *
+   * <p>The library default is intentionally bounded — never set this to a value that would
+   * let a single wedged downstream accumulate unbounded queued acquires and amplify a
+   * single-backend outage into application-wide heap pressure.</p>
    */
   private int pendingAcquireMaxCount = -1;
 

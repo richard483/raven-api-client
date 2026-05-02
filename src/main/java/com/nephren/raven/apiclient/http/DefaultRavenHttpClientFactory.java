@@ -52,30 +52,62 @@ public class DefaultRavenHttpClientFactory implements RavenHttpClientFactory, Di
 
   @Override
   public HttpClient httpClient(String clientName, ApiClientConfigProperties config) {
+    int connectMs = validateTimeoutMillis(config.getConnectTimeout(), "connect", clientName);
+    long readMs = validateTimeoutMillis(config.getReadTimeout(), "read", clientName);
+    long writeMs = validateTimeoutMillis(config.getWriteTimeout(), "write", clientName);
+
     String poolKey = RavenHttpClientFactory.defaultPoolKey(clientName, config);
     HttpClient base = baseClients.computeIfAbsent(poolKey, this::buildBase);
     return base
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-            (int) config.getConnectTimeout().toMillis())
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectMs)
         .doOnConnected(connection -> connection
-            .addHandlerLast(new ReadTimeoutHandler(
-                config.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS))
-            .addHandlerLast(new WriteTimeoutHandler(
-                config.getWriteTimeout().toMillis(), TimeUnit.MILLISECONDS)));
+            .addHandlerLast(new ReadTimeoutHandler(readMs, TimeUnit.MILLISECONDS))
+            .addHandlerLast(new WriteTimeoutHandler(writeMs, TimeUnit.MILLISECONDS)));
+  }
+
+  /**
+   * Reject null, non-positive, or int-overflowing timeouts up front so a misconfiguration
+   * surfaces with a clear message instead of silent truncation in Netty.
+   */
+  private static int validateTimeoutMillis(java.time.Duration value, String name,
+      String clientName) {
+    if (value == null) {
+      throw new IllegalArgumentException(
+          "#RavenHttpClientFactory " + name + "Timeout must not be null for client '"
+              + clientName + "'");
+    }
+    long millis = value.toMillis();
+    if (millis <= 0) {
+      throw new IllegalArgumentException(
+          "#RavenHttpClientFactory " + name + "Timeout must be > 0ms for client '"
+              + clientName + "', got " + millis + "ms");
+    }
+    if (millis > Integer.MAX_VALUE) {
+      throw new IllegalArgumentException(
+          "#RavenHttpClientFactory " + name + "Timeout exceeds the supported range for"
+              + " client '" + clientName + "': " + millis + "ms (max "
+              + Integer.MAX_VALUE + "ms)");
+    }
+    return (int) millis;
   }
 
   private HttpClient buildBase(String poolKey) {
-    ConnectionProvider provider = ConnectionProvider.builder("raven-" + sanitize(poolKey))
-        .maxConnections(sharedPoolProperties.getMaxConnections())
-        .pendingAcquireMaxCount(sharedPoolProperties.getPendingAcquireMaxCount())
-        .build();
+    ConnectionProvider.Builder builder = ConnectionProvider.builder("raven-" + sanitize(poolKey))
+        .maxConnections(sharedPoolProperties.getMaxConnections());
+    int pendingMax = sharedPoolProperties.getPendingAcquireMaxCount();
+    // -1 sentinel → leave the builder unset so Reactor Netty's library default
+    // (2 * maxConnections) applies. Any other value is a deliberate override.
+    if (pendingMax >= 0) {
+      builder.pendingAcquireMaxCount(pendingMax);
+    }
+    ConnectionProvider provider = builder.build();
     ownedProviders.put(poolKey, provider);
     log.debug(
         "#RavenHttpClientFactory creating HttpClient for {} (maxConnections={},"
             + " pendingAcquireMaxCount={})",
         poolKey,
         sharedPoolProperties.getMaxConnections(),
-        sharedPoolProperties.getPendingAcquireMaxCount());
+        pendingMax < 0 ? "default(2*maxConnections)" : pendingMax);
     return HttpClient.create(provider);
   }
 

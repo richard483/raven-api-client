@@ -7,11 +7,12 @@ import reactor.netty.http.client.HttpClient;
  * Extension point for materializing the Reactor Netty {@link HttpClient} that backs each
  * {@code @RavenApiClient}'s {@code WebClient}.
  *
- * <p>The default implementation shares connection pools and event loops across all clients
- * targeting the same scheme+host:port (with the same configured timeouts) and applies the
- * per-client connect/read/write timeouts on top. Replace this bean to take full control of
- * pooling — typical reasons include custom TLS configuration, a metric-instrumented
- * {@code ConnectionProvider}, sharing pools with other parts of an application, or a
+ * <p>The default implementation shares connection pools across clients targeting the same
+ * scheme+host:port with the same read/write timeouts, and applies per-client
+ * connect/read/write timeouts on top. Reactor Netty's event-loop threads
+ * ({@code LoopResources}) come from the process-global instance regardless of pool key, so
+ * isolation here is at the {@code ConnectionProvider} level only — replace this bean to
+ * also isolate event loops, customize TLS, instrument the pool with metrics, or use a
  * different keying strategy.</p>
  *
  * <p>The full per-client configuration is passed to {@link #httpClient(String,
@@ -59,5 +60,19 @@ public interface RavenHttpClientFactory {
     return PoolKeys.fromUrl(config.getUrl())
         + "|r=" + config.getReadTimeout().toMillis()
         + ",w=" + config.getWriteTimeout().toMillis();
+  }
+
+  /**
+   * Returns a base-URL string suitable for {@code WebClient.Builder.baseUrl(...)} — the
+   * configured value as-is when it already carries a scheme, otherwise prefixed with
+   * {@code http://} so the documented {@code localhost:8080} format works at request time
+   * the same way it works for pool-key derivation. Returns the input unchanged when null
+   * or blank so existing validation/error paths still see the original value.
+   */
+  static String normalizedBaseUrl(String url) {
+    if (url == null || url.isBlank()) {
+      return url;
+    }
+    return url.contains("://") ? url : "http://" + url;
   }
 }
