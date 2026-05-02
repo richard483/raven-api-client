@@ -7,10 +7,8 @@ import com.nephren.raven.apiclient.aop.fallback.FallbackMetadataBuilder;
 import com.nephren.raven.apiclient.aop.fallback.RavenApiClientFallback;
 import com.nephren.raven.apiclient.body.ApiBodyResolver;
 import com.nephren.raven.apiclient.errorresolver.ApiErrorResolver;
+import com.nephren.raven.apiclient.http.RavenHttpClientFactory;
 import com.nephren.raven.apiclient.reactor.helper.SchedulerHelper;
-import io.netty.channel.ChannelOption;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -21,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -92,9 +89,12 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
   }
 
   private void prepareWebClient() {
+    RavenHttpClientFactory factory = applicationContext.getBean(RavenHttpClientFactory.class);
+    HttpClient httpClient = factory.httpClient(name, metadata.getProperties());
+    String baseUrl = RavenHttpClientFactory.normalizedBaseUrl(metadata.getProperties().getUrl());
     WebClient.Builder builder = applicationContext.getBean(WebClient.Builder.class)
-        .exchangeStrategies(getExchangeStrategies()).baseUrl(metadata.getProperties().getUrl())
-        .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
+        .exchangeStrategies(getExchangeStrategies()).baseUrl(baseUrl)
+        .clientConnector(new ReactorClientHttpConnector(httpClient))
         .defaultHeaders(
             httpHeaders -> metadata.getProperties().getHeaders().forEach(httpHeaders::add));
     webClient = builder.build();
@@ -147,20 +147,6 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
           .jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON));
 
     }).build();
-  }
-
-  private HttpClient getHttpClient() {
-    return HttpClient.create().option(
-            ChannelOption.CONNECT_TIMEOUT_MILLIS,
-            (int) metadata.getProperties().getConnectTimeout().toMillis())
-        .doOnConnected(connection -> connection
-            .addHandlerLast(
-                new ReadTimeoutHandler(metadata.getProperties().getReadTimeout().toMillis(),
-                    TimeUnit.MILLISECONDS))
-            .addHandlerLast(
-                new WriteTimeoutHandler(metadata.getProperties().getWriteTimeout().toMillis(),
-                    TimeUnit.MILLISECONDS))
-        );
   }
 
   @Override

@@ -33,6 +33,10 @@ public class PropertiesHelper {
         target.setErrorResolver(source.getErrorResolver());
       }
 
+      if (Objects.nonNull(source.getIsolatePool())) {
+        target.setIsolatePool(source.getIsolatePool());
+      }
+
       source.getHeaders().forEach((key, value) -> target.getHeaders().put(key, value));
     }
   }

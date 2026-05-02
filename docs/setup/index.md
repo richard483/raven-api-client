@@ -9,7 +9,7 @@ has_children: false
 
 ## Api Client Properties
 
-```
+```properties
 # where your api client interfaces are located for registering api client bean(required)
 nephren.raven.apiclient.packages=com.example.apiclient
 
@@ -35,11 +35,40 @@ nephren.raven.apiclient.configs.<apiClient-name>.headers.<headers-key>=applicati
 # not required, error resolver for the api client, default is DefaultErrorResolver
 nephren.raven.apiclient.configs.<apiClient-name>.error-resolver=com.nephren.raven.apiclient.
 serviceExample.client.errorresolver.DefaultErrorResolver
+
+# not required, opt this client out of shared connection pooling so it gets its own
+# dedicated Reactor Netty ConnectionProvider, default is false. By default clients
+# sharing a scheme://host:port (and identical read/write timeouts) reuse the same pool.
+# Note: this isolates the connection pool only — Reactor Netty's process-global event-loop
+# threads are still shared. Replace the RavenHttpClientFactory bean if full thread
+# isolation is required.
+nephren.raven.apiclient.configs.<apiClient-name>.isolate-pool=true
+```
+
+## Connection Pool Tunables
+
+These apply to every `ConnectionProvider` the default factory creates — both shared pools
+and isolated ones. Most apps will never need to touch them.
+
+The default `max-connections=500` is a Raven override above Reactor Netty's library default
+to better fit a typical multi-client fan-out pattern. The default
+`pending-acquire-max-count=-1` is a sentinel meaning "use Reactor Netty's library default"
+of `2 × max-connections`; set a positive value to override (smaller for fail-fast under
+load, larger for very bursty workloads).
+
+```properties
+# not required, max concurrent connections per pool, default is 500 (Raven override)
+nephren.raven.apiclient.shared-pool.max-connections=500
+
+# not required, max queued acquire attempts when the pool is saturated.
+# -1 (default) means use Reactor Netty's default (2 * max-connections);
+# set a positive value to override.
+nephren.raven.apiclient.shared-pool.pending-acquire-max-count=-1
 ```
 
 ## Api Scheduler
 
-```
+```properties
 # not required, customize scheduler flavors, default is immediate
 nephren.raven.reactor.helper.configs.<apiClient-name>.type=single
 
