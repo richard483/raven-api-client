@@ -4,6 +4,7 @@ import com.nephren.raven.apiclient.serviceExample.client.EmptyExampleClient;
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithFallback;
 import com.nephren.raven.apiclient.serviceExample.client.ExampleClientWithOtherFallback;
 import com.nephren.raven.apiclient.serviceExample.client.GETExampleClient;
+import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -114,6 +115,14 @@ public class GETClientService {
 
   public Mono<String> getRequestISEWithoutResponseEntity() {
     return getExampleClient.getRequestISEWithoutResponseEntity();
+  }
+
+  public Mono<ResponseEntity<List<ServerResponseBody>>> getRequestListPojo() {
+    return getExampleClient.getRequestListPojo();
+  }
+
+  public Mono<List<ServerResponseBody>> getRequestListPojoNoEntity() {
+    return getExampleClient.getRequestListPojoNoEntity();
   }
 
 }
