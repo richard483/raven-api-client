@@ -297,9 +297,12 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
     if (ResponseEntity.class.equals(parameterizedType.getRawType())) {
       return handleResponseEntity(client, parameterizedType);
     } else {
+      // Pass the full parameterized type (e.g. List<Foo>) so Jackson preserves the
+      // generic type argument; previously only the raw type (List.class) was passed,
+      // which silently degraded deserialization to LinkedHashMap for POJO elements.
       return client.flatMap(
           c -> c.retrieve()
-              .bodyToMono(ParameterizedTypeReference.forType(parameterizedType.getRawType())));
+              .bodyToMono(ParameterizedTypeReference.forType(parameterizedType)));
     }
   }
 
@@ -330,9 +333,12 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   private Mono handleListResponseSpec(Mono<WebClient.ResponseSpec> responseSpec,
       ParameterizedType parameterizedType) {
+    // parameterizedType here is the inner List<X> from ResponseEntity<List<X>>; pass it
+    // wholesale so the response body deserializes into List<X>, not List<LinkedHashMap>.
+    // Previously only the element type X was passed, which produced ResponseEntity<X>
+    // and silently coerced JSON arrays of POJOs to raw structures.
     return responseSpec.flatMap(respEntity -> respEntity.toEntity(
-        ParameterizedTypeReference.forType(
-            parameterizedType.getActualTypeArguments()[0])));
+        ParameterizedTypeReference.forType(parameterizedType)));
   }
 
   private Mono handleSingleResponseSpec(Mono<WebClient.ResponseSpec> responseSpec, Type type) {

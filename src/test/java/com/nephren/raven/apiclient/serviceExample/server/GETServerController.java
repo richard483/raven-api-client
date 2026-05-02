@@ -1,5 +1,6 @@
 package com.nephren.raven.apiclient.serviceExample.server;
 
+import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,6 +79,20 @@ public class GETServerController {
   @GetMapping(path = "/getRequest-listWithoutResponseEntity")
   public Mono<List<String>> getRequestListWithoutResponseEntity() {
     return Mono.just(List.of("Hello", "こんいちわ", "Hola", "Bonjour", "Hallo"));
+  }
+
+  @GetMapping(path = "/getRequest-listPojo")
+  public Mono<ResponseEntity<List<ServerResponseBody>>> getRequestListPojo() {
+    return Mono.just(ResponseEntity.ok(List.of(
+        ServerResponseBody.builder().message("first").build(),
+        ServerResponseBody.builder().message("second").build())));
+  }
+
+  @GetMapping(path = "/getRequest-listPojo-no-entity")
+  public Mono<List<ServerResponseBody>> getRequestListPojoNoEntity() {
+    return Mono.just(List.of(
+        ServerResponseBody.builder().message("first").build(),
+        ServerResponseBody.builder().message("second").build()));
   }
 
 }

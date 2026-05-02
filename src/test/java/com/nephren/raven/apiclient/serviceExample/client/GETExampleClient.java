@@ -1,6 +1,7 @@
 package com.nephren.raven.apiclient.serviceExample.client;
 
 import com.nephren.raven.apiclient.annotation.RavenApiClient;
+import com.nephren.raven.apiclient.serviceExample.model.ServerResponseBody;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -85,5 +86,13 @@ public interface GETExampleClient {
   @GetMapping(value = "/getRequest-ISE",
       produces = MediaType.APPLICATION_JSON_VALUE)
   Mono<String> getRequestISEWithoutResponseEntity();
+
+  @GetMapping(value = "/getRequest-listPojo",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<ResponseEntity<List<ServerResponseBody>>> getRequestListPojo();
+
+  @GetMapping(value = "/getRequest-listPojo-no-entity",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Mono<List<ServerResponseBody>> getRequestListPojoNoEntity();
 
 }
