@@ -1,32 +1,26 @@
 package com.nephren.raven.apiclient.aop;
 
-import com.nephren.raven.apiclient.exception.RavenApiException;
 import com.nephren.raven.apiclient.properties.PropertiesHelper;
 import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -43,15 +37,6 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 public class RequestMappingMetadataBuilder {
-
-  private static final Class<?>[] mappingAnnotation = {
-      GetMapping.class,
-      PutMapping.class,
-      PostMapping.class,
-      PatchMapping.class,
-      DeleteMapping.class,
-      RequestMapping.class
-  };
 
   private final Map<String, MultiValueMap<String, String>> headers = new HashMap<>();
   private final Map<String, Integer> apiUrlPositions = new HashMap<>();
@@ -215,33 +200,17 @@ public class RequestMappingMetadataBuilder {
       Parameter[] parameters,
       Class<T> parameterAnnotationClass) {
     Map<String, Integer> parameterPosition = new HashMap<>();
-    for (int i = 0;
-        i < parameters.length;
-        i++) {
-      Parameter parameter = parameters[i];
-      T annotation = parameter.getAnnotation(parameterAnnotationClass);
-      if (annotation != null) {
-        String paramName = getParamName(annotation);
+    for (int i = 0; i < parameters.length; i++) {
+      MergedAnnotation<T> annotation =
+          MergedAnnotations.from(parameters[i]).get(parameterAnnotationClass);
+      if (annotation.isPresent()) {
+        String paramName = annotation.getString("name");
         if (!paramName.isEmpty()) {
           parameterPosition.put(paramName, i);
         }
       }
     }
     return parameterPosition;
-  }
-
-  private <T extends Annotation> String getParamName(T annotation) {
-    String paramName = "", paramValue = "";
-    try {
-      paramName = annotation.getClass().getMethod("name").invoke(annotation).toString();
-      paramValue =
-          annotation.getClass().getMethod("value").invoke(annotation).toString();
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RavenApiException(
-          "#RavenApiClient RequestMappingMetadataBuilder failed to read parameter name from "
-              + "annotation " + annotation.annotationType().getName(), e);
-    }
-    return paramName.isEmpty() ? paramValue : paramName;
   }
 
   private void prepareResponseBodyClasses() {
@@ -309,55 +278,28 @@ public class RequestMappingMetadataBuilder {
     });
   }
 
+  /**
+   * Resolve the (possibly meta-annotated) {@link RequestMapping} on the given method into a
+   * {@link RavenRequestMapping}. Returns {@code null} if no mapping annotation is present.
+   *
+   * <p>Spring's {@link MergedAnnotations} follows meta-annotations and applies {@code @AliasFor}
+   * overrides, so {@code @GetMapping}, {@code @PostMapping}, etc. are resolved through their
+   * meta-annotated {@code @RequestMapping} with the correct {@code method} attribute populated.
+   */
   private RavenRequestMapping getRequestMappingAnnotation(Method method) {
-    for (Class annotation : mappingAnnotation) {
-      Annotation methodAnnotation = method.getAnnotation(annotation);
-      if (methodAnnotation != null) {
-        return getAnnotation(method, annotation);
-      }
+    MergedAnnotation<RequestMapping> annotation =
+        MergedAnnotations.from(method).get(RequestMapping.class);
+    if (!annotation.isPresent()) {
+      return null;
     }
-    return null;
-  }
-
-  private <T extends Annotation> RavenRequestMapping getAnnotation(
-      Method method, Class<T> annotationType) {
-    try {
-      T annotation = method.getAnnotation(annotationType);
-      String[] consumes =
-          (String[]) annotation.getClass().getMethod("consumes").invoke(annotation);
-      String[] produces =
-          (String[]) annotation.getClass().getMethod("produces").invoke(annotation);
-      String[] headers = (String[]) annotation.getClass().getMethod("headers").invoke(annotation);
-      String[] path = (String[]) annotation.getClass().getMethod("path").invoke(annotation);
-      String[] value = (String[]) annotation.getClass().getMethod("value").invoke(annotation);
-      RequestMethod[] requestMethod = getRequestMethod(annotation, annotationType);
-      return RavenRequestMapping.builder()
-          .consumes(consumes)
-          .produces(produces)
-          .headers(headers)
-          .path(path)
-          .value(value)
-          .method(requestMethod)
-          .build();
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RavenApiException(
-          "#RavenApiClient getAnnotation failed to read attributes from "
-              + annotationType.getName() + " on method " + method.getName(), e);
-    }
-  }
-
-  private <T extends Annotation> RequestMethod[] getRequestMethod(T annotation,
-      Class<T> annotationType)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    return switch (annotationType.getSimpleName()) {
-      case "PutMapping" -> List.of(RequestMethod.PUT).toArray(new RequestMethod[0]);
-      case "PostMapping" -> List.of(RequestMethod.POST).toArray(new RequestMethod[0]);
-      case "PatchMapping" -> List.of(RequestMethod.PATCH).toArray(new RequestMethod[0]);
-      case "DeleteMapping" -> List.of(RequestMethod.DELETE).toArray(new RequestMethod[0]);
-      case "RequestMapping" ->
-          (RequestMethod[]) annotation.getClass().getMethod("method").invoke(annotation);
-      default -> List.of(RequestMethod.GET).toArray(new RequestMethod[0]);
-    };
+    return RavenRequestMapping.builder()
+        .consumes(annotation.getStringArray("consumes"))
+        .produces(annotation.getStringArray("produces"))
+        .headers(annotation.getStringArray("headers"))
+        .path(annotation.getStringArray("path"))
+        .value(annotation.getStringArray("value"))
+        .method(annotation.getEnumArray("method", RequestMethod.class))
+        .build();
   }
 
   private String getDefaultContentType() {
