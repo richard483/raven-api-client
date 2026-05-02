@@ -1,7 +1,6 @@
 package com.nephren.raven.apiclient.http;
 
-import com.nephren.raven.apiclient.properties.RavenApiClientProperties;
-import java.time.Duration;
+import com.nephren.raven.apiclient.properties.RavenApiClientProperties.ApiClientConfigProperties;
 import reactor.netty.http.client.HttpClient;
 
 /**
@@ -9,45 +8,53 @@ import reactor.netty.http.client.HttpClient;
  * {@code @RavenApiClient}'s {@code WebClient}.
  *
  * <p>The default implementation shares connection pools and event loops across all clients
- * targeting the same scheme+host:port and applies the per-client connect/read/write timeouts
- * on top. Replace this bean to take full control of pooling — typical reasons include custom
- * TLS configuration, a metric-instrumented {@code ConnectionProvider}, or sharing pools with
- * other parts of an application.</p>
+ * targeting the same scheme+host:port (with the same configured timeouts) and applies the
+ * per-client connect/read/write timeouts on top. Replace this bean to take full control of
+ * pooling — typical reasons include custom TLS configuration, a metric-instrumented
+ * {@code ConnectionProvider}, sharing pools with other parts of an application, or a
+ * different keying strategy.</p>
  *
- * <p>Implementations must be thread-safe; {@link #httpClient(String, ConfigTimeouts)} is
- * called once at bean initialization time per declared client, but consumers may also call
- * the returned {@link HttpClient} concurrently from any thread.</p>
+ * <p>The full per-client configuration is passed to {@link #httpClient(String,
+ * ApiClientConfigProperties)} so a replacement implementation can make decisions based on
+ * URL, headers, fallback class, or any other property. Implementations must be thread-safe;
+ * {@link #httpClient} is called once per declared client at bean initialization, but the
+ * returned {@link HttpClient} may be invoked concurrently from any thread.</p>
  */
 public interface RavenHttpClientFactory {
 
   /**
-   * Resolve an {@link HttpClient} for the given client config and pool key. The factory is
-   * free to share an underlying {@code ConnectionProvider}/{@code LoopResources} between
-   * calls with the same {@code poolKey}; per-call configuration like timeouts is applied on
-   * top of the cached base client and does not affect the cache.
+   * Resolve an {@link HttpClient} for the given client. Implementations are free to share
+   * an underlying {@code ConnectionProvider}/{@code LoopResources} between calls; the
+   * default implementation does so when {@code config} resolves to the same pool key.
    *
-   * @param poolKey  identifies the pool. The default factory uses the scheme+host:port of
-   *                 the configured URL, or {@code "isolated:" + clientName} when the client
-   *                 is configured with {@code isolate-pool: true}.
-   * @param timeouts per-call connect/read/write timeouts to apply to the returned client.
-   * @return an {@link HttpClient} configured with the given timeouts; the underlying
-   *         connection pool may be shared across calls with the same {@code poolKey}.
+   * @param clientName the {@code @RavenApiClient(name = ...)} value, used by the default
+   *                   implementation when {@code isolate-pool} is set.
+   * @param config     the merged {@link ApiClientConfigProperties} for this client (after
+   *                   defaults are applied), giving the implementation access to URL,
+   *                   timeouts, headers, etc.
+   * @return an {@link HttpClient} ready for use; the underlying connection pool may be
+   *         shared with other clients depending on the factory's keying strategy.
    */
-  HttpClient httpClient(String poolKey, ConfigTimeouts timeouts);
+  HttpClient httpClient(String clientName, ApiClientConfigProperties config);
 
   /**
-   * Helper that derives the pool key from a single client's config: the scheme+host:port of
-   * its configured URL by default, or {@code "isolated:" + clientName} when
-   * {@link RavenApiClientProperties.ApiClientConfigProperties#isIsolatePool()} is set.
+   * The default pool key the bundled implementation uses: {@code scheme://host:port|<timeouts>}
+   * for shared pools, or {@code "isolated:" + clientName} when the client is configured with
+   * {@code isolate-pool: true}.
+   *
+   * <p>Timeouts are folded into the shared key because Reactor Netty's
+   * {@code ReadTimeoutHandler} / {@code WriteTimeoutHandler} attach to the channel, so two
+   * clients with different read/write timeouts cannot safely share a pooled channel. Custom
+   * factories that apply timeouts at the request level (e.g. via {@code responseTimeout})
+   * may use a narrower key.</p>
    */
-  static String poolKeyFor(String clientName,
-      RavenApiClientProperties.ApiClientConfigProperties config) {
-    if (config.isIsolatePool()) {
+  static String defaultPoolKey(String clientName, ApiClientConfigProperties config) {
+    if (Boolean.TRUE.equals(config.getIsolatePool())) {
       return "isolated:" + clientName;
     }
-    return PoolKeys.fromUrl(config.getUrl());
+    return PoolKeys.fromUrl(config.getUrl())
+        + "|c=" + config.getConnectTimeout().toMillis()
+        + ",r=" + config.getReadTimeout().toMillis()
+        + ",w=" + config.getWriteTimeout().toMillis();
   }
-
-  /** Timeouts applied to the returned {@link HttpClient}. */
-  record ConfigTimeouts(Duration connect, Duration read, Duration write) {}
 }

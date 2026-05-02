@@ -33,9 +33,9 @@ public class PropertiesHelper {
         target.setErrorResolver(source.getErrorResolver());
       }
 
-      // boolean primitive — always copy. Default field value (false) makes this safe even
-      // when the source did not set it explicitly.
-      target.setIsolatePool(source.isIsolatePool());
+      if (Objects.nonNull(source.getIsolatePool())) {
+        target.setIsolatePool(source.getIsolatePool());
+      }
 
       source.getHeaders().forEach((key, value) -> target.getHeaders().put(key, value));
     }

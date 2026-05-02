@@ -53,11 +53,17 @@ public class RavenApiClientProperties {
     /**
      * When {@code true}, this client gets its own Reactor Netty {@code HttpClient} (and hence
      * its own connection pool and event loops) instead of sharing the pool keyed by
-     * scheme+host:port. Default is {@code false} — most callers benefit from sharing. Set to
-     * {@code true} when this client has materially different timeout/TLS/proxy needs from
-     * other clients targeting the same host, or when its load profile would starve them.
+     * scheme+host:port. Treated as {@code false} when unset (most callers benefit from
+     * sharing). Set to {@code true} when this client has materially different TLS/proxy
+     * needs from other clients targeting the same host, or when its load profile would
+     * starve them.
+     *
+     * <p>Modeled as the wrapper {@link Boolean} so that a value set on
+     * {@code configs.default.isolate-pool} can be inherited by named configs that omit the
+     * key — a primitive default would unconditionally overwrite the inherited value back to
+     * {@code false} during property merging.</p>
      */
-    private boolean isolatePool = false;
+    private Boolean isolatePool;
   }
 
 }

@@ -43,6 +43,7 @@ import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
 
 @Slf4j
 public class RavenApiClientMethodInterceptor implements InitializingBean, MethodInterceptor,
@@ -89,14 +90,10 @@ public class RavenApiClientMethodInterceptor implements InitializingBean, Method
 
   private void prepareWebClient() {
     RavenHttpClientFactory factory = applicationContext.getBean(RavenHttpClientFactory.class);
-    String poolKey = RavenHttpClientFactory.poolKeyFor(name, metadata.getProperties());
-    RavenHttpClientFactory.ConfigTimeouts timeouts = new RavenHttpClientFactory.ConfigTimeouts(
-        metadata.getProperties().getConnectTimeout(),
-        metadata.getProperties().getReadTimeout(),
-        metadata.getProperties().getWriteTimeout());
+    HttpClient httpClient = factory.httpClient(name, metadata.getProperties());
     WebClient.Builder builder = applicationContext.getBean(WebClient.Builder.class)
         .exchangeStrategies(getExchangeStrategies()).baseUrl(metadata.getProperties().getUrl())
-        .clientConnector(new ReactorClientHttpConnector(factory.httpClient(poolKey, timeouts)))
+        .clientConnector(new ReactorClientHttpConnector(httpClient))
         .defaultHeaders(
             httpHeaders -> metadata.getProperties().getHeaders().forEach(httpHeaders::add));
     webClient = builder.build();

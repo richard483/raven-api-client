@@ -35,6 +35,26 @@ nephren.raven.apiclient.configs.<apiClient-name>.headers.<headers-key>=applicati
 # not required, error resolver for the api client, default is DefaultErrorResolver
 nephren.raven.apiclient.configs.<apiClient-name>.error-resolver=com.nephren.raven.apiclient.
 serviceExample.client.errorresolver.DefaultErrorResolver
+
+# not required, opt this client out of shared connection pooling so it gets its own
+# dedicated Reactor Netty HttpClient + ConnectionProvider, default is false. By default
+# clients sharing a scheme://host:port (and identical timeouts) reuse the same pool.
+nephren.raven.apiclient.configs.<apiClient-name>.isolate-pool=true
+```
+
+## Shared Connection Pool Tunables
+
+These apply to every shared `HttpClient` pool the default factory creates. Most apps will
+never need to touch them — defaults match Reactor Netty conventions and are sized for
+typical client fan-out.
+
+```
+# not required, max concurrent connections per pool, default is 500
+nephren.raven.apiclient.shared-pool.max-connections=500
+
+# not required, max queued acquire attempts when the pool is saturated.
+# -1 (default) is unbounded; set a positive value to fail-fast under load.
+nephren.raven.apiclient.shared-pool.pending-acquire-max-count=-1
 ```
 
 ## Api Scheduler
