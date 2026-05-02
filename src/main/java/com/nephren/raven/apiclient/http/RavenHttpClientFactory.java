@@ -38,23 +38,26 @@ public interface RavenHttpClientFactory {
   HttpClient httpClient(String clientName, ApiClientConfigProperties config);
 
   /**
-   * The default pool key the bundled implementation uses: {@code scheme://host:port|<timeouts>}
-   * for shared pools, or {@code "isolated:" + clientName} when the client is configured with
+   * The default pool key the bundled implementation uses:
+   * {@code scheme://host:port|r=<read>,w=<write>} for shared pools, or
+   * {@code "isolated:" + clientName} when the client is configured with
    * {@code isolate-pool: true}.
    *
-   * <p>Timeouts are folded into the shared key because Reactor Netty's
-   * {@code ReadTimeoutHandler} / {@code WriteTimeoutHandler} attach to the channel, so two
-   * clients with different read/write timeouts cannot safely share a pooled channel. Custom
-   * factories that apply timeouts at the request level (e.g. via {@code responseTimeout})
-   * may use a narrower key.</p>
+   * <p>Read and write timeouts are folded into the shared key because Reactor Netty's
+   * {@link io.netty.handler.timeout.ReadTimeoutHandler} /
+   * {@link io.netty.handler.timeout.WriteTimeoutHandler} attach to the channel, so two
+   * clients with different read/write timeouts cannot safely share a pooled channel. Connect
+   * timeout is intentionally <em>not</em> part of the key — it only affects opening new
+   * sockets and is reapplied per call as a channel option, so clients that differ only in
+   * connect timeout can still share a pool. Custom factories that apply timeouts at the
+   * request level (e.g. via {@code responseTimeout}) may use a narrower key.</p>
    */
   static String defaultPoolKey(String clientName, ApiClientConfigProperties config) {
     if (Boolean.TRUE.equals(config.getIsolatePool())) {
       return "isolated:" + clientName;
     }
     return PoolKeys.fromUrl(config.getUrl())
-        + "|c=" + config.getConnectTimeout().toMillis()
-        + ",r=" + config.getReadTimeout().toMillis()
+        + "|r=" + config.getReadTimeout().toMillis()
         + ",w=" + config.getWriteTimeout().toMillis();
   }
 }

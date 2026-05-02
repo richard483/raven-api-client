@@ -6,13 +6,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Tunables for the Reactor Netty {@code ConnectionProvider} backing every shared
- * {@code HttpClient} pool. Most apps will never need to touch these — they are exposed
+ * Tunables for the Reactor Netty {@code ConnectionProvider} backing every {@code HttpClient}
+ * the default factory creates. Most apps will never need to touch these — they are exposed
  * primarily for environments with high client fan-out or unusually slow downstreams.
  *
- * <p>These values apply to every shared pool the factory creates (one per scheme+host:port
- * key). Per-client opt-out via {@code isolate-pool} is configured on each entry in
- * {@code nephren.raven.apiclient.configs.<name>}.
+ * <p>These values apply to <em>every</em> provider the default factory builds, both shared
+ * pools (one per scheme+host:port key plus read/write timeouts) and isolated pools opted
+ * into via {@code configs.<name>.isolate-pool: true}. Per-client opt-out controls only
+ * which key a client lands on — it does not change the per-pool sizing.</p>
  */
 @Data
 @AllArgsConstructor

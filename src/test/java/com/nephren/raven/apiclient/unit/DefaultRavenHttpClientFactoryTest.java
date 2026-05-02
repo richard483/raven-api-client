@@ -42,10 +42,20 @@ class DefaultRavenHttpClientFactoryTest {
   }
 
   @Test
-  void defaultPoolKey_byDefault_usesSchemeHostPortPlusTimeoutFingerprint() {
+  void defaultPoolKey_byDefault_usesSchemeHostPortPlusReadWriteTimeouts() {
     String key = RavenHttpClientFactory.defaultPoolKey(
         "any-name", config("http://example.com:8080/api", 1000, 2000, 3000));
-    Assertions.assertThat(key).isEqualTo("http://example.com:8080|c=1000,r=2000,w=3000");
+    Assertions.assertThat(key).isEqualTo("http://example.com:8080|r=2000,w=3000");
+  }
+
+  @Test
+  void defaultPoolKey_ignoresConnectTimeout_soClientsCanShareWhenItDiffers() {
+    // CONNECT_TIMEOUT_MILLIS only affects new socket attempts — it is reapplied per call as
+    // a channel option and never persists on a pooled channel. Clients that differ only in
+    // connect timeout must therefore share a pool.
+    String a = RavenHttpClientFactory.defaultPoolKey("x", config("http://e:80", 1000, 2000, 2000));
+    String b = RavenHttpClientFactory.defaultPoolKey("y", config("http://e:80", 9000, 2000, 2000));
+    Assertions.assertThat(a).isEqualTo(b);
   }
 
   @Test
@@ -56,6 +66,26 @@ class DefaultRavenHttpClientFactoryTest {
     Assertions.assertThat(
             RavenHttpClientFactory.defaultPoolKey("b", config("https://example.com")))
         .startsWith("https://example.com:443|");
+  }
+
+  @Test
+  void defaultPoolKey_acceptsBareHostPortUrlFromSetupDocs() {
+    // The setup docs use "localhost:8080" (no scheme); make sure that normalizes onto the
+    // same key as "http://localhost:8080" so doc-following users actually share a pool.
+    String bare = RavenHttpClientFactory.defaultPoolKey(
+        "a", config("localhost:8080", 2000, 2000, 2000));
+    String full = RavenHttpClientFactory.defaultPoolKey(
+        "b", config("http://localhost:8080", 2000, 2000, 2000));
+    Assertions.assertThat(bare)
+        .isEqualTo(full)
+        .startsWith("http://localhost:8080|");
+  }
+
+  @Test
+  void defaultPoolKey_acceptsBareHostPortWithPath() {
+    String key = RavenHttpClientFactory.defaultPoolKey(
+        "a", config("localhost:8080/api", 2000, 2000, 2000));
+    Assertions.assertThat(key).startsWith("http://localhost:8080|");
   }
 
   @Test
@@ -89,15 +119,26 @@ class DefaultRavenHttpClientFactoryTest {
   }
 
   @Test
-  void httpClient_withSameHostButDifferentTimeouts_allocatesDistinctBaseClients() {
+  void httpClient_withSameHostButDifferentReadOrWriteTimeouts_allocatesDistinctBaseClients() {
     // Channel-bound ReadTimeoutHandler/WriteTimeoutHandler would otherwise leak across
-    // clients sharing a pooled channel; the default key folds timeouts in to prevent it.
+    // clients sharing a pooled channel; the default key folds those timeouts in to prevent
+    // it. Connect timeout is intentionally excluded (see separate test).
     factory.httpClient("a", config("http://example.com:80", 2000, 2000, 2000));
-    factory.httpClient("b", config("http://example.com:80", 5000, 5000, 5000));
+    factory.httpClient("b", config("http://example.com:80", 2000, 5000, 2000));
 
     Assertions.assertThat(factory)
         .extracting("baseClients", InstanceOfAssertFactories.MAP)
         .hasSize(2);
+  }
+
+  @Test
+  void httpClient_withSameHostAndReadWriteTimeouts_sharesEvenWhenConnectTimeoutDiffers() {
+    factory.httpClient("a", config("http://example.com:80", 1000, 2000, 2000));
+    factory.httpClient("b", config("http://example.com:80", 9000, 2000, 2000));
+
+    Assertions.assertThat(factory)
+        .extracting("baseClients", InstanceOfAssertFactories.MAP)
+        .hasSize(1);
   }
 
   @Test

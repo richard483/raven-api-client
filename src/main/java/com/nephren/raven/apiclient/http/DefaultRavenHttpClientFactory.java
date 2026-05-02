@@ -6,11 +6,13 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
+import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
@@ -91,15 +93,30 @@ public class DefaultRavenHttpClientFactory implements RavenHttpClientFactory, Di
         .replace("=", "-");
   }
 
+  /**
+   * Disposes every cached {@link ConnectionProvider} in parallel and waits at most
+   * {@link #DISPOSE_TIMEOUT} for the whole batch to complete. Per-provider failures (or a
+   * provider that exceeds the budget) are logged but do not block the others — disposal of
+   * one stalled provider must not gate shutdown of the rest of the application.
+   */
   @Override
   public void destroy() {
-    ownedProviders.forEach((key, provider) -> {
-      try {
-        provider.disposeLater().block(DISPOSE_TIMEOUT);
-      } catch (RuntimeException e) {
-        log.warn("#RavenHttpClientFactory failed to dispose connection provider for {}", key, e);
-      }
-    });
+    if (ownedProviders.isEmpty()) {
+      return;
+    }
+    List<Mono<Void>> disposals = ownedProviders.entrySet().stream()
+        .map(entry -> entry.getValue().disposeLater()
+            .doOnError(err -> log.warn(
+                "#RavenHttpClientFactory failed to dispose connection provider for {}",
+                entry.getKey(), err))
+            .onErrorResume(err -> Mono.empty()))
+        .toList();
+    try {
+      Mono.when(disposals).block(DISPOSE_TIMEOUT);
+    } catch (RuntimeException e) {
+      log.warn("#RavenHttpClientFactory disposal exceeded {} budget; some providers"
+          + " may not have shut down cleanly", DISPOSE_TIMEOUT, e);
+    }
     ownedProviders.clear();
     baseClients.clear();
   }

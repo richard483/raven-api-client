@@ -8,8 +8,11 @@ import java.net.URISyntaxException;
  *
  * <p>The key shape is intentionally narrow — scheme + host + (resolved) port — so that two
  * clients hitting the same logical backend share a pool regardless of differences in path,
- * query, or trailing slashes. Anything we cannot parse falls back to the raw input string,
- * which preserves backwards-compatible isolation for malformed URLs without throwing.</p>
+ * query, or trailing slashes. Inputs without an explicit scheme (e.g. the
+ * {@code localhost:8080} format used in our setup docs) are normalized as if they were
+ * {@code http://...} so they collapse onto the same key as their scheme-prefixed siblings.
+ * Anything still unparseable falls back to a {@code raw:} prefix to preserve isolation
+ * without throwing.</p>
  */
 final class PoolKeys {
 
@@ -21,10 +24,15 @@ final class PoolKeys {
     }
     try {
       URI uri = new URI(url);
+      if (uri.getHost() == null && !url.contains("://")) {
+        // Inputs like "localhost:8080" or "localhost:8080/api" parse as opaque URIs with no
+        // host; re-parse with an http:// prefix so they normalize to the same scheme/host/port
+        // shape as fully-qualified URLs.
+        uri = new URI("http://" + url);
+      }
       String scheme = uri.getScheme() == null ? "http" : uri.getScheme().toLowerCase();
       String host = uri.getHost();
       if (host == null) {
-        // not an absolute URL (e.g. just "localhost"); use the raw value as the key
         return "raw:" + url;
       }
       int port = uri.getPort();
